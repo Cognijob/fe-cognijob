@@ -9,6 +9,7 @@ export default function Hero() {
   }
   return (
     <section
+      id="main"
       className="w-full h-screen flex flex-col overflow-hidden" 
       style={{
         background: 'linear-gradient(180deg, #E6CDEE 25.96%, #D6CDEE 50.48%, #CDD6EE 77.88%)',
