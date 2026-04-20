@@ -5,12 +5,9 @@ import Keunggulan from '../components/landing/Keunggulan'
 import FAQ from '../components/landing/FAQ'
 import Footer from '../components/layout/Footer'
 
-const bgGradient = 'linear-gradient(180deg, #E6CDEE 26%, #D6CDEE 50%, #CDD6EE 78%)'
-
 export default function LandingPage() {
   return (
-    // Pindahkan style background ke div pembungkus yang scrollable
-    <div className="w-full relative" style={{ background: bgGradient }}>
+    <div className="w-full relative bg-[#CDD6EE]">
       {/* Navbar fixed */}
       <Navbar />
       
