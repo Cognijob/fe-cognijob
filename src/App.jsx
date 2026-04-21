@@ -10,6 +10,9 @@ import Login from './pages/Login'
 import RecruiterLayout from './components/layout/RecruiterLayout'
 import DashboardOverview from './pages/recruiter/DashboardOverview'
 import JobDetail from './pages/recruiter/JobDetail'
+import Settings from './pages/recruiter/Settings'
+import CreateJob from './pages/recruiter/CreateJob'
+
 
 /**
  * PlaceholderPage digunakan sementara untuk menu yang belum memiliki file halaman sendiri.
@@ -52,10 +55,12 @@ function App() {
           
           {/* Menu manajemen lainnya sesuai PRD */}
           <Route path="jobs" element={<PlaceholderPage title="Job Management" />} />
+          <Route path="create-job" element={<CreateJob />} />
           <Route path="applicants" element={<PlaceholderPage title="Applicant Management" />} />
           <Route path="messages" element={<PlaceholderPage title="Messages" />} />
           <Route path="company-profile" element={<PlaceholderPage title="Company Profile" />} />
-          <Route path="settings" element={<PlaceholderPage title="Settings" />} />
+          <Route path="settings" element={<Settings />} />
+          
           
         </Route>
 

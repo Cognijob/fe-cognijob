@@ -98,6 +98,7 @@ export default function Login() {
     }
     
     console.log('Logging in with:', form)
+    navigate('/recruiter/dashboard')
     // Logika login sukses ke backend
   }
 

@@ -21,7 +21,10 @@ export default function JobDetail() {
           <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-black/10 hover:bg-gray-50 transition-colors">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B173D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </button>
-          <button className="px-5 py-2.5 bg-white border border-black/20 text-[#0B173D] font-semibold rounded-full hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm">
+          <button 
+            onClick={() => navigate('/recruiter/create-job')}
+            className="px-5 h-10 bg-[#FBFAFF] border border-[#0B173D]/30 text-[#0B173D] font-semibold text-[14px] rounded-full hover:bg-gray-100 transition-colors flex items-center gap-2"
+          >
             <span>+</span> Buat job
           </button>
         </div>
