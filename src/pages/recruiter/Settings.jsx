@@ -24,7 +24,7 @@ export default function Settings() {
       
       {/* HEADER */}
       <div className="w-full h-[80px] px-8 flex justify-between items-center border-b border-black/20 shrink-0">
-        <div className="text-[18px] font-medium text-gray-400 flex items-center">
+        <div className="text-[18px] font-bold text-[#B4B2A9] flex items-center">
           Recruiter <span className="mx-2">&gt;</span> <span className="text-[#0B173D] font-bold">Settings</span>
         </div>
         <div className="flex items-center gap-3">
