@@ -1,12 +1,12 @@
-<p><strong> FE COGNIJOB </strong></p>
-# Scope Frontend
+# FE COGNIJOB
+## Scope Frontend
     - UI/UX implementation
     - Client-side routing   
     - Integrasi API (frontend side)
     - State management 
     - Responsive design
 
-# Tech Stack
+## Tech Stack
     - React (Vite)
     - Tailwind CSS
     - React Router DOM
