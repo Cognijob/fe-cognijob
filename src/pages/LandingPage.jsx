@@ -1,21 +1,33 @@
 import Navbar from '../components/layout/Navbar'
 import Hero from '../components/landing/Hero'
-
-const bgGradient = 'linear-gradient(180deg, #E6CDEE 26%, #D6CDEE 50%, #CDD6EE 78%)'
+import CaraKerja from '../components/landing/CaraKerja'
+import Keunggulan from '../components/landing/Keunggulan'
+import FAQ from '../components/landing/FAQ'
+import Footer from '../components/layout/Footer'
 
 export default function LandingPage() {
   return (
-    <div className="w-full min-h-screen relative" style={{ background: bgGradient }}>
-      {/* Navbar */}
+    <div className="w-full relative bg-[#CDD6EE]">
+      {/* Navbar fixed */}
       <Navbar />
       
       {/* Main content */}
-      <main className="w-full">
-        {/* Hero Section */}
+      <main className="w-full flex flex-col items-center">
+        {/* Section Hero */}
         <Hero />
         
-        {/* Section lainnya nanti di bawah sini */}
+        {/* Section Cara Kerja */}
+        <CaraKerja />
+
+        {/* Section Keunggulan */}
+        <Keunggulan />
+
+        {/* Section FAQ */}
+        <FAQ />
       </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

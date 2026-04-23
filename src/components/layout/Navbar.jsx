@@ -10,7 +10,7 @@ export default function Navbar() {
   useEffect(() => {
     const handleScroll = () => {
       const sections = ['main', 'cara-kerja', 'keunggulan', 'faq']
-      const scrollPosition = window.scrollY + 100 // Offset agar perpindahan terasa natural
+      const scrollPosition = window.scrollY + 100 
 
       sections.forEach((id) => {
         const element = document.getElementById(id)
