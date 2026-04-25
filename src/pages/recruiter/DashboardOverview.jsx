@@ -12,27 +12,6 @@ export default function DashboardOverview() {
 
   return (
     <div className="w-full flex flex-col min-h-screen pb-10 animate-fade-in">
-      
-      {/* HEADER: Full Width, Tinggi persis 80px agar nyambung dengan garis sidebar */}
-      <div className="w-full h-[80px] px-8 flex justify-between items-center border-b border-black/20 shrink-0">
-        <div className="text-[18px] font-bold text-[#B4B2A9] flex items-center">
-          Recruiter <span className="mx-2 font-normal text-[16px]">&gt;</span> <span className="text-[#0B173D]">Dashboard</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="w-10 h-10 bg-[#FBFAFF] rounded-full flex items-center justify-center border border-[#0B173D]/30 hover:bg-gray-100 transition-colors">
-            <Search size={18} color="#0B173D" />
-          </button>
-          <button className="w-10 h-10 bg-[#FBFAFF] rounded-full flex items-center justify-center border border-[#0B173D]/30 hover:bg-gray-100 transition-colors">
-            <Bell size={18} color="#0B173D" />
-          </button>
-          <button 
-            onClick={() => navigate('/recruiter/create-job')}
-            className="px-5 h-10 bg-[#FBFAFF] border border-[#0B173D]/30 text-[#0B173D] font-semibold text-[14px] rounded-full hover:bg-gray-100 transition-colors flex items-center gap-2"
-          >
-            <span>+</span> Buat job
-          </button>
-        </div>
-      </div>
 
       {/* KONTEN UTAMA: Baru dibatasi lebarnya di sini */}
       <div className="w-full max-w-[1000px] mx-auto px-8 pt-8">
