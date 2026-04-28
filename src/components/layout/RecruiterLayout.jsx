@@ -1,8 +1,8 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Search, Bell, X } from 'lucide-react'
-import { CloudSync, Copy } from 'lucide-react';
 
+// Import Icons
 import DashboardIcon from '../../assets/DashboardPages/DashboardIcon.png'
 import JobIcon from '../../assets/DashboardPages/JobIcon.png'
 import ApplicantIcon from '../../assets/DashboardPages/ApplicantIcon.png'
@@ -28,14 +28,74 @@ export default function RecruiterLayout() {
     { path: '/recruiter/settings', label: 'Settings', icon: SettingIcon },
   ]
 
-  // Fungsi untuk mendapatkan nama halaman dari URL (untuk breadcrumb)
-  const getPageTitle = () => {
-    const path = location.pathname.split('/').pop()
-    return path.charAt(0).toUpperCase() + path.slice(1).replace('-', ' ')
-  }
+  const getBreadcrumbs = () => {
+    const breadcrumbMap = {
+      'dashboard': 'Dashboard',
+      'jobs': 'Job Management',
+      'applicants': 'Applicant Management',
+      'messages': 'Messages',
+      'company-profile': 'Company Profile',
+      'settings': 'Settings',
+      'create-job': 'Buat Lowongan Baru',
+      'edit-job': 'Edit Lowongan',
+      'job': 'Detail Lowongan'
+    };
+
+    // Ambil semua segmen path kecuali 'recruiter' dan ID unik (JOB-XXX)
+    const segments = location.pathname.split('/').filter(x => x && x !== 'recruiter' && !x.toUpperCase().includes('JOB-'));
+
+    return (
+      <div className="flex items-center">
+        {/* ROOT: Recruiter (Warna Abu-abu & Bisa diklik) */}
+        <span className="text-[#B4B2A9] font-bold text-[18px]">Recruiter</span>
+        
+        {/* INJEKSI OTOMATIS: Sisipkan Job Management jika di halaman Edit/Create */}
+        {(location.pathname.includes('edit-job') || location.pathname.includes('create-job')) && (
+          <span className="flex items-center">
+            <span className="mx-2 font-normal text-[18px] text-[#B4B2A9]">&gt;</span>
+            <span 
+              className="cursor-pointer hover:text-[#0B173D] transition-colors font-bold text-[18px] text-[#B4B2A9]"
+              onClick={() => navigate('/recruiter/jobs')}
+            >
+              Job Management
+            </span>
+          </span>
+        )}
+
+        {/* RENDER SEGMEN URL */}
+        {segments.map((name, index) => {
+          // Jangan tampilkan 'jobs' lagi jika sudah diinjeksi manual di atas agar tidak double
+          if (name === 'jobs' && (location.pathname.includes('edit-job') || location.pathname.includes('create-job'))) return null;
+          
+          const isLast = index === segments.length - 1;
+          const displayName = breadcrumbMap[name.toLowerCase()] || name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' ');
+
+          return (
+            <span key={name} className="flex items-center">
+              <span className="mx-2 font-normal text-[18px] text-[#B4B2A9]">&gt;</span>
+              
+              {isLast ? (
+                // HALAMAN AKTIF: Biru Gelap (Tidak bisa diklik)
+                <span className="text-[#0B173D] font-bold text-[18px]">{displayName}</span>
+              ) : (
+                // HALAMAN INDUK (Termasuk Dashboard): Abu-abu & Bisa diklik
+                <span 
+                  className="cursor-pointer hover:text-[#0B173D] transition-colors font-bold text-[18px] text-[#B4B2A9]"
+                  onClick={() => navigate(`/recruiter/${name}`)}
+                >
+                  {displayName}
+                </span>
+              )}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
 
   const renderMenuItem = (item) => {
-    const isActive = location.pathname.startsWith(item.path)
+    const isActive = location.pathname.startsWith(item.path) || 
+    (item.path === '/recruiter/jobs' && (location.pathname.includes('edit-job') || location.pathname.includes('job/') || location.pathname.includes('create-job')));
     return (
       <Link
         key={item.path}
@@ -60,93 +120,72 @@ export default function RecruiterLayout() {
     <div className="flex w-full min-h-screen bg-[#FBFAFF]" style={{ fontFamily: "'Poppins', sans-serif" }}>
       
       {/* SIDEBAR */}
-      <aside className="w-[260px] bg-[#0B173D] text-white fixed h-full flex flex-col z-20">
-        <div className="h-[80px] px-6 flex flex-col justify-center border-b border-white/20 w-full shrink-0">
-          <h1 className="text-2xl font-bold text-white leading-none">Cogni<span className="text-[#1E42AC]">Job</span></h1>
-          <p className="text-[11px] text-white/50 mt-1 leading-none">Recruiter Panel</p>
+      <aside className="w-[260px] bg-[#0B173D] text-white fixed h-full flex flex-col z-50 shadow-xl">
+        <div className="h-[80px] px-6 flex flex-col justify-center border-b border-white/10 w-full shrink-0">
+          <h1 className="text-2xl font-bold text-white cursor-pointer" onClick={() => navigate('/recruiter/dashboard')}>
+            Cogni<span className="text-[#1E42AC]">Job</span>
+          </h1>
         </div>
 
-        <nav className="flex-1 flex flex-col gap-6 overflow-y-auto scrollbar-hide px-4 py-8">
+        <nav className="flex-1 flex flex-col gap-6 overflow-y-auto px-4 py-8 scrollbar-hide">
           <div className="flex flex-col gap-1">
-            <h3 className="px-4 text-[13px] font-bold text-[#8A95A5] uppercase tracking-wide mb-2">Main</h3>
+            <h3 className="px-4 text-[11px] font-extrabold text-[#8A95A5] uppercase tracking-widest mb-2">Main Menu</h3>
             {mainMenuItems.map(renderMenuItem)}
           </div>
           <div className="flex flex-col gap-1">
-            <h3 className="px-4 text-[13px] font-bold text-[#8A95A5] uppercase tracking-wide mb-2">Account</h3>
+            <h3 className="px-4 text-[11px] font-extrabold text-[#8A95A5] uppercase tracking-widest mb-2">Account</h3>
             {accountMenuItems.map(renderMenuItem)}
           </div>
         </nav>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
+      {/* CONTENT AREA */}
       <main className="flex-1 ml-[260px] min-h-screen flex flex-col">
         
-        {/* HEADER / TOPBAR */}
-        <header className="w-full h-[80px] bg-white px-8 flex justify-between items-center border-b border-black/10 sticky top-0 z-10">
+        {/* HEADER */}
+        <header className="w-full h-[80px] bg-white px-8 flex justify-between items-center border-b border-black/5 sticky top-0 z-40 shadow-sm">
           
-          {/* BREADCRUMB */}
-          <div className="text-[18px] font-bold text-[#B4B2A9] flex items-center">
-            Recruiter <span className="mx-2 font-normal text-[16px]">&gt;</span> <span className="text-[#0B173D]">{getPageTitle()}</span>
+          <div className="flex items-center">
+            {getBreadcrumbs()}
           </div>
 
           <div className="flex items-center gap-3">
-            {/* SEARCH INTERACTION */}
-<div className={`flex items-center transition-all duration-300 ${isSearchOpen ? 'bg-gray-100 px-4 py-1 rounded-full border border-[#0B173D]/20 w-[300px]' : ''}`}>
-  
-  {isSearchOpen && (
-    <div className="flex items-center justify-between w-full"> {/* Container Flex Utama */}
-      {/* SEARCH INTERACTION CONTAINER */}
-      <Search size={24} color="#0B173D"/>
-        <input 
-          autoFocus
-          type="text"
-          placeholder="Cari job, kandidat..."
-          className="bg-transparent border-none outline-none text-sm text-[#0B173D] w-full ml-3"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+            <div className={`flex items-center transition-all duration-300 ${isSearchOpen ? 'bg-gray-100 px-4 py-1 rounded-full border border-[#0B173D]/20 w-[300px]' : ''}`}>
+              {isSearchOpen ? (
+                <div className="flex items-center justify-between w-full">
+                  <Search size={18} color="#0B173D"/>
+                  <input 
+                    autoFocus
+                    type="text"
+                    placeholder="Cari job..."
+                    className="bg-transparent border-none outline-none text-sm text-[#0B173D] w-full ml-3"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <X size={16} className="cursor-pointer" onClick={() => {setSearchQuery(""); setIsSearchOpen(false);}} />
+                </div>
+              ) : (
+                <button onClick={() => setIsSearchOpen(true)} className="w-10 h-10 bg-[#FBFAFF] rounded-full flex items-center justify-center border border-[#0B173D]/20 hover:bg-gray-100 transition-colors">
+                  <Search size={18} color="#0B173D" />
+                </button>
+              )}
+            </div>
 
-        <button 
-          onClick={() => {
-            setSearchQuery(""); // hapus teks saat klik X
-            setIsSearchOpen(false);
-          }}
-          className="ml-2 hover:bg-gray-200 rounded-full p-1 transition-colors"
-        >
-          <X size={18} color="#0B173D" />
-        </button>
-
-      </div>
-    )}
-
-    {/* Button Search Awal (saat tertutup) */}
-    {!isSearchOpen && (
-      <button 
-        onClick={() => setIsSearchOpen(true)}
-        className="w-10 h-10 bg-[#FBFAFF] rounded-full flex items-center justify-center border border-[#0B173D]/30 hover:bg-gray-100 transition-colors"
-      >
-        <Search size={18} color="#0B173D" />
-      </button>
-    )}
-  </div>
-
-            {/* NOTIFICATION */}
-            <button className="w-10 h-10 bg-[#FBFAFF] rounded-full flex items-center justify-center border border-[#0B173D]/30 hover:bg-gray-100 transition-colors">
+            <button className="w-10 h-10 bg-[#FBFAFF] rounded-full flex items-center justify-center border border-[#0B173D]/20 hover:bg-gray-100 transition-colors">
               <Bell size={18} color="#0B173D" />
             </button>
 
-            {/* BUAT JOB BUTTON */}
             <button 
-              onClick={() => navigate('/recruiter/jobs')}
-              className="px-5 h-10 bg-[#FBFAFF] border border-[#0B173D]/30 text-[#0B173D] font-semibold text-[14px] rounded-full hover:bg-gray-100 transition-colors flex items-center gap-2"
+              onClick={() => navigate('/recruiter/create-job')}
+              className="px-5 h-10 bg-[#0B173D] text-white font-semibold text-[13px] rounded-full hover:bg-[#1E42AC] transition-all flex items-center gap-2 shadow-md shadow-[#0B173D]/20"
             >
               <span className="text-lg">+</span> Buat job
             </button>
           </div>
         </header>
 
-        {/* CONTENT AREA */}
-        <div className="flex-1 overflow-y-auto">
+        {/* OUTLET */}
+        <div className="flex-1 overflow-y-auto bg-[#FBFAFF]">
           <Outlet /> 
         </div>
 

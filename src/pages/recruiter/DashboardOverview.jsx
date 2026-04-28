@@ -103,12 +103,18 @@ export default function DashboardOverview() {
                   <div className="border border-black/30 px-4 py-1.5 rounded-full text-[13px] font-semibold text-[#000000] bg-white">
                     {job.status === 'Draft' ? 'Draft' : `${job.applicants} Pelamar`}
                   </div>
+
                   <button
-                    onClick={() => navigate(`/recruiter/dashboard/job/${job.id}`)}
-                    className="bg-[#1D42AC] text-white px-6 py-1.5 rounded-full text-[14px] font-semibold hover:bg-[#153285] transition-colors"
-                  >
-                    Buka
-                  </button>
+                      onClick={() =>
+                        navigate(`/recruiter/edit-job/${job.id}`, {
+                          state: { job },
+                        })
+                      }
+                      className="bg-[#1D42AC] text-white px-6 py-1.5 rounded-full text-[14px] font-semibold hover:bg-[#153285] transition-colors"
+                    >
+                      Buka
+                    </button>
+
                 </div>
               </div>
             ))}

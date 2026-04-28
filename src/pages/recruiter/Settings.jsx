@@ -1,15 +1,32 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Search, Bell, User, Lock, Sliders, Mail, Megaphone, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
+import { User, Lock, Sliders, Mail, Megaphone, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
 
 export default function Settings() {
-  const navigate = useNavigate()
-
   const [activeTab, setActiveTab] = useState('account')
+  
+  // --- STATE UNTUK FORM IDENTITY (DISET KOSONG) ---
+  const [fullName, setFullName] = useState("")
+  const [email, setEmail] = useState("")
+  
+  // --- STATE UNTUK SECURITY (DISET KOSONG) ---
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [showNewPw, setShowNewPw] = useState(false)
   const [showConfirmPw, setShowConfirmPw] = useState(false)
-  const [emailNotif, setEmailNotif] = useState(true)
+
+  // --- STATE UNTUK PREFERENCES (DISET FALSE) ---
+  const [emailNotif, setEmailNotif] = useState(false)
   const [marketingNotif, setMarketingNotif] = useState(false)
+
+  // --- FUNGSI UNTUK RESET DATA ---
+  const handleDiscardChanges = () => {
+    setFullName("")
+    setEmail("")
+    setNewPassword("")
+    setConfirmPassword("")
+    setEmailNotif(false)
+    setMarketingNotif(false)
+  }
 
   const scrollToSection = (id) => {
     setActiveTab(id)
@@ -22,31 +39,9 @@ export default function Settings() {
   return (
     <div className="w-full flex flex-col min-h-screen pb-10 animate-fade-in">
       
-      {/* HEADER */}
-      <div className="w-full h-[80px] px-8 flex justify-between items-center border-b border-black/20 shrink-0">
-        <div className="text-[18px] font-bold text-[#B4B2A9] flex items-center">
-          Recruiter <span className="mx-2">&gt;</span> <span className="text-[#0B173D] font-bold">Settings</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="w-10 h-10 bg-[#FBFAFF] rounded-full flex items-center justify-center border border-[#0B173D]/30 hover:bg-gray-100 transition-colors">
-            <Search size={18} color="#0B173D" />
-          </button>
-          <button className="w-10 h-10 bg-[#FBFAFF] rounded-full flex items-center justify-center border border-[#0B173D]/30 hover:bg-gray-100 transition-colors">
-            <Bell size={18} color="#0B173D" />
-          </button>
-          <button 
-            onClick={() => navigate('/recruiter/create-job')}
-            className="px-5 h-10 bg-[#FBFAFF] border border-[#0B173D]/30 text-[#0B173D] font-semibold text-[14px] rounded-full hover:bg-gray-100 transition-colors flex items-center gap-2"
-          >
-            <span>+</span> Buat job
-          </button>
-        </div>
-      </div>
-
-      {/* KONTEN UTAMA */}
       <div className="w-full max-w-[1000px] mx-auto px-8 pt-8">
         
-        {/* PAGE TITLE (Ukuran disesuaikan) */}
+        {/* PAGE TITLE */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-[#0B173D]">Account Settings</h1>
           <p className="text-[15px] text-[#0B173D]/80 mt-1">
@@ -54,10 +49,9 @@ export default function Settings() {
           </p>
         </div>
 
-        {/* MAIN CONTENT SPLIT */}
         <div className="flex gap-8 items-start relative">
           
-          {/* INNER SIDEBAR */}
+          {/* INNER SIDEBAR (STICKY) */}
           <div className="w-[200px] shrink-0 flex flex-col gap-1.5 sticky top-8">
             <button 
               onClick={() => scrollToSection('account')}
@@ -98,7 +92,9 @@ export default function Settings() {
                   <label className="text-[11px] font-bold text-[#B4B2A9] uppercase tracking-wider">Full Name</label>
                   <input 
                     type="text" 
-                    defaultValue="Marcus Chen" 
+                    placeholder="Masukkan nama lengkap"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     className="w-full bg-white/80 border-none rounded-xl px-4 py-2.5 text-[14px] font-medium text-[#111C2D] outline-none focus:ring-2 focus:ring-[#1D42AC]/30"
                   />
                 </div>
@@ -106,7 +102,9 @@ export default function Settings() {
                   <label className="text-[11px] font-bold text-[#B4B2A9] uppercase tracking-wider">Email Address</label>
                   <input 
                     type="email" 
-                    defaultValue="MarcusChen@gmail.com" 
+                    placeholder="contoh@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-white/80 border-none rounded-xl px-4 py-2.5 text-[14px] font-medium text-[#111C2D] outline-none focus:ring-2 focus:ring-[#1D42AC]/30"
                   />
                   <div className="flex items-center gap-1.5 mt-0.5">
@@ -135,7 +133,9 @@ export default function Settings() {
                   <div className="relative">
                     <input 
                       type={showNewPw ? "text" : "password"} 
-                      defaultValue="rahasia12345" 
+                      placeholder="Masukkan sandi baru"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
                       className="w-full bg-white border-none rounded-xl px-4 py-2.5 text-[14px] font-medium text-gray-700 outline-none pr-10"
                     />
                     <button 
@@ -152,7 +152,9 @@ export default function Settings() {
                   <div className="relative">
                     <input 
                       type={showConfirmPw ? "text" : "password"} 
-                      defaultValue="rahasia12345" 
+                      placeholder="Ulangi sandi baru"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
                       className="w-full bg-white border-none rounded-xl px-4 py-2.5 text-[14px] font-medium text-gray-700 outline-none pr-10"
                     />
                     <button 
@@ -217,7 +219,10 @@ export default function Settings() {
 
             {/* ACTION BUTTONS */}
             <div className="flex items-center justify-end gap-4 mt-2 pt-6 border-t border-black/10">
-              <button className="px-5 py-2.5 rounded-xl text-[14px] font-semibold text-[#1D42AC] border border-[#1D42AC] bg-transparent hover:bg-[#1D42AC] hover:text-white transition-all duration-300">
+              <button 
+                onClick={handleDiscardChanges}
+                className="px-5 py-2.5 rounded-xl text-[14px] border font-bold bg-white transition-all duration-300 hover:text-white hover:shadow-lg border-red-500 text-red-500 hover:bg-red-500"
+             >
                 Buang Semua Perubahan
               </button>
               <button className="px-5 py-2.5 rounded-xl text-[14px] font-semibold text-[#1D42AC] border border-[#1D42AC] bg-transparent hover:bg-[#1D42AC] hover:text-white transition-all duration-300 shadow-sm hover:shadow-md">

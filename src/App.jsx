@@ -12,6 +12,11 @@ import DashboardOverview from './pages/recruiter/DashboardOverview'
 import JobDetail from './pages/recruiter/JobDetail'
 import Settings from './pages/recruiter/Settings'
 import CreateJob from './pages/recruiter/CreateJob'
+import Jobs from './pages/recruiter/Jobs'
+import EditJob from './pages/recruiter/EditJob'
+import Messages from './pages/recruiter/Messages'
+import ApplicantManagement from "./pages/recruiter/ApplicantManagement"
+import CompanyProfile from "./pages/recruiter/CompanyProfile";
 
 
 /**
@@ -51,16 +56,20 @@ function App() {
           <Route path="dashboard" element={<DashboardOverview />} />
           
           {/* Detail spesifik lowongan berdasarkan ID: /recruiter/dashboard/job/:id */}
-          <Route path="dashboard/job/:id" element={<JobDetail />} />
+
+   
           
           {/* Menu manajemen lainnya sesuai PRD */}
-          <Route path="jobs" element={<PlaceholderPage title="Job Management" />} />
+          <Route path="jobs" element={<Jobs />} />
+          <Route path="jobs/job/:id" element={<JobDetail />} />
+
           <Route path="create-job" element={<CreateJob />} />
-          <Route path="applicants" element={<PlaceholderPage title="Applicant Management" />} />
-          <Route path="messages" element={<PlaceholderPage title="Messages" />} />
-          <Route path="company-profile" element={<PlaceholderPage title="Company Profile" />} />
+          <Route path="edit-job/:id" element={<EditJob />} />
+
+          <Route path="applicants" element={<ApplicantManagement />} />
+          <Route path="messages" element={<Messages />} />
+          <Route path="company-profile" element={<CompanyProfile />} />
           <Route path="settings" element={<Settings />} />
-          
           
         </Route>
 
