@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LockIconImg from '../assets/AuthPages/LockIcon.png'
 import EmailIconImg from '../assets/AuthPages/EmailIcon.png'
+import { Eye, EyeOff } from 'lucide-react';
 
-// Gradient dan styling bawaan
+// Gradient bg
 const bgGradient = 'linear-gradient(180deg, #E6CDEE 25.96%, #D6CDEE 50.48%, #CDD6EE 77.88%)'
 
 const cardStyle = {
@@ -30,30 +31,14 @@ const btnPrimaryStyle = {
   color: '#FFFFFF',
 }
 
-// Icon Mata (Diambil dari Register.jsx)
-const EyeIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9197A8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-)
-
-const EyeOffIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9197A8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-    <line x1="1" y1="1" x2="23" y2="23"/>
-  </svg>
-)
-
-// Komponen InputField yang diperbarui (mendukung rightEl dan hasError)
+// Komponen InputField
 function InputField({ icon, placeholder, type = 'text', name, value, onChange, rightEl, hasError }) {
   return (
     <div 
       className="flex items-center gap-3 px-4 w-full transition-colors" 
       style={{
         ...inputStyle,
-        border: hasError ? '1px solid #EF4444' : '1px solid #CFD6F0' // Border merah jika error
+        border: hasError ? '1px solid #EF4444' : '1px solid #CFD6F0' 
       }}
     >
       {icon && (
@@ -76,10 +61,9 @@ function InputField({ icon, placeholder, type = 'text', name, value, onChange, r
 export default function Login() {
   const navigate = useNavigate()
   
-  // State manajemen
-  const [view, setView] = useState('login') // 'login' | 'forgot'
+  const [view, setView] = useState('login') 
   const [showPw, setShowPw] = useState(false)
-  const [isError, setIsError] = useState(false) // Trigger error status
+  const [isError, setIsError] = useState(false) 
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -87,24 +71,19 @@ export default function Login() {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
-    if (isError) setIsError(false) // Hilangkan error saat user mengetik ulang
+    if (isError) setIsError(false) 
   }
 
   const handleLogin = () => {
-    // Simulasi Error (Kamu bisa ubah logika ini sesuai respon backend nanti)
     if (form.email === '' || form.password === '') {
       setIsError(true)
       return
     }
-    
-    console.log('Logging in with:', form)
     navigate('/recruiter/dashboard')
-    // Logika login sukses ke backend
   }
 
   const handleResetPassword = () => {
-    console.log('Kirim link atur ulang ke:', form.email)
-    // Logika kirim email reset password
+    console.log('Reset link sent to:', form.email)
   }
 
   return (
@@ -116,7 +95,7 @@ export default function Login() {
         className="w-full max-w-[420px] flex flex-col px-10 py-10 relative transition-all"
         style={cardStyle}
       >
-        {/* Tombol Back Dinamis */}
+
         <button
           onClick={() => view === 'forgot' ? setView('login') : navigate('/')}
           className="absolute top-6 left-6 hover:opacity-60 transition-opacity"
@@ -127,7 +106,6 @@ export default function Login() {
         </button>
 
         {view === 'login' ? (
-          /* ================= VIEW: SIGN IN ================= */
           <>
             <h2
               className="text-center mt-3 mb-1"
@@ -161,14 +139,17 @@ export default function Login() {
                 onChange={handleChange}
                 hasError={isError}
                 rightEl={
-                  <button onClick={() => setShowPw(!showPw)} className="shrink-0 outline-none">
-                    {showPw ? <EyeOffIcon /> : <EyeIcon />}
+                  <button 
+                    onClick={() => setShowPw(!showPw)} 
+                    className="shrink-0 outline-none text-[#9197A8] hover:text-[#0B173D] transition-colors"
+                  >
+                    {/* 2. Implementasi Icon Lucide */}
+                    {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 }
               />
             </div>
 
-            {/* Area Pesan Error & Lupa Kata Sandi */}
             <div className="w-full flex justify-between items-center mt-1 mb-8">
               <div style={{ minWidth: '150px' }}>
                 {isError && (
@@ -209,7 +190,6 @@ export default function Login() {
             </p>
           </>
         ) : (
-          /* ================= VIEW: FORGOT PASSWORD ================= */
           <>
             <h2
               className="text-center mt-3 mb-1"

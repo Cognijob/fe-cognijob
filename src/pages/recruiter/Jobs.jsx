@@ -24,7 +24,7 @@ export default function Jobs() {
     setIsModalOpen(true);
   };
 
-  // Fungsi eksekusi hapus
+  // Fungsi hapus
   const confirmDelete = () => {
     setJobData(jobData.filter(j => j.id !== selectedJob.id));
     setIsModalOpen(false);
@@ -110,7 +110,7 @@ export default function Jobs() {
         </table>
       </div>
 
-      {/* Pagination Footer */}
+      {/*  Footer */}
       <div className="flex justify-between items-center px-2">
         <p className="text-[13px] text-gray-400">
           Menampilkan {filteredData.length} dari {jobData.length} lowongan pekerjaan.

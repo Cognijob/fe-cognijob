@@ -13,7 +13,7 @@ export default function DashboardOverview() {
   return (
     <div className="w-full flex flex-col min-h-screen pb-10 animate-fade-in">
 
-      {/* KONTEN UTAMA: Baru dibatasi lebarnya di sini */}
+      {/* KONTEN UTAMA */}
       <div className="w-full max-w-[1000px] mx-auto px-8 pt-8">
         
         {/* SECTION 1: OVERVIEW */}
@@ -106,7 +106,7 @@ export default function DashboardOverview() {
 
                   <button
                       onClick={() =>
-                        navigate(`/recruiter/edit-job/${job.id}`, {
+                        navigate(`/recruiter/jobs/job/${job.id}`, {
                           state: { job },
                         })
                       }

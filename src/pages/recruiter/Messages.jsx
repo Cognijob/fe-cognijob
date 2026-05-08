@@ -9,7 +9,7 @@ export default function Messages() {
     { id: 3, name: "Budi", avatar: "B", color: "bg-purple-200" },
   ];
 
-  // Data Dummy untuk Isi Pesan (Dihubungkan dengan Chat ID)
+  // Data dummy
   const [allMessages, setAllMessages] = useState({
     1: [
       { id: 101, text: "Halo, saya ingin menanyakan lebih lanjut mengenai posisi ini. Apakah ada sesi technical test??", sender: "them", time: "09:45" },
@@ -34,7 +34,7 @@ export default function Messages() {
 
   // Logic Kirim Pesan
   const handleSendMessage = (e) => {
-    e.preventDefault(); // Biar gak refresh page kalau pake form
+    e.preventDefault(); 
     if (!inputText.trim() || !selectedChat) return;
 
     const newMessage = {
@@ -44,13 +44,13 @@ export default function Messages() {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    // Update state pesan berdasarkan ID chat yang aktif
+    // Update state pesan berdasarkan ID 
     setAllMessages({
       ...allMessages,
       [selectedChat.id]: [...(allMessages[selectedChat.id] || []), newMessage]
     });
 
-    setInputText(""); // Kosongkan input
+    setInputText(""); 
   };
 
   return (
@@ -110,7 +110,7 @@ export default function Messages() {
               <h4 className="font-bold text-[#0B173D]">{selectedChat.name}</h4>
             </div>
             
-            {/* Body (Bubble Chat) */}
+            {/* Bubble Chat */}
             <div className="flex-1 p-6 overflow-y-auto flex flex-col gap-4">
               {allMessages[selectedChat.id]?.map((msg) => (
                 <div 

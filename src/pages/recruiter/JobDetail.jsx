@@ -6,7 +6,7 @@ export default function JobDetail() {
   return (
     <div className="w-full flex flex-col min-h-screen pb-10 animate-fade-in">
 
-      {/* KONTEN UTAMA: Dibatasi 1000px, diletakkan di tengah */}
+      {/* KONTEN UTAMA */}
       <div className="w-full max-w-[1000px] mx-auto px-8 pt-8">
         
         {/* JUDUL HALAMAN */}
@@ -28,7 +28,7 @@ export default function JobDetail() {
             <span className="px-4 py-1.5 rounded-full text-xs font-semibold bg-[#FACC15] text-white">7 Perlu Review</span>
           </div>
 
-          {/* Info Grid (Detail Ringkas) */}
+          {/* Info Grid */}
           <div className="grid grid-cols-2 gap-y-6 gap-x-12 mb-8 border-b border-gray-100 pb-8">
             <div>
               <p className="text-xs font-medium text-gray-400 mb-1">Lokasi Pekerjaan</p>
@@ -48,7 +48,7 @@ export default function JobDetail() {
             </div>
           </div>
 
-          {/* Deskripsi Lengkap */}
+          {/* Deskripsi  */}
           <div>
             <p className="text-xs font-medium text-gray-400 mb-2">Deskripsi Pekerjaan</p>
             <div className="text-[14px] text-[#0B173D]/80 leading-relaxed font-medium">
@@ -94,16 +94,16 @@ export default function JobDetail() {
           </div>
         </div>
 
-        {/* TOMBOL AKSI TAMBAHAN (OPTIONAL) */}
+        {/* TOMBOL AKSI TAMBAHAN */}
        <div className="flex justify-end gap-4 mt-8">
       <button 
-        onClick={() => navigate("/recruiter/jobs")} // Kembali ke halaman sebelumnya
+        onClick={() => navigate("/recruiter/jobs")} 
         className= 'px-10 py-2 rounded-lg border border-[#1E42AC] text-[#1E42AC] font-bold bg-white transition-all duration-300 hover:bg-[#1E42AC] hover:text-white hover:shadow-lg'
       >
         Kembali
       </button>
       <button 
-        onClick={() => navigate('/recruiter/edit-job/JOB-01')} // Arahkan ke rute edit
+        onClick={() => navigate('/recruiter/edit-job/JOB-01')} 
         onClick={() => navigate('/recruiter/edit-job/JOB-02')} 
         onClick={() => navigate('/recruiter/edit-job/JOB-03')}
         className= 'px-10 py-2 rounded-lg border border-[#1E42AC] text-[#1E42AC] font-bold bg-white transition-all duration-300 hover:bg-[#1E42AC] hover:text-white hover:shadow-lg'

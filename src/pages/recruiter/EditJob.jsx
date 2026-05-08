@@ -186,8 +186,8 @@ const handlePrimaryAction = () => {
           onClick={handlePrimaryAction}
           className={`px-10 py-2 rounded-lg border font-bold bg-white transition-all duration-300 hover:text-white hover:shadow-lg ${
       jobData.status?.toLowerCase() === "aktif"
-        ? "border-red-500 text-red-500 hover:bg-red-500" // Warna Merah kalau Aktif (untuk Tutup)
-        : "border-[#1E42AC] text-[#1E42AC] hover:bg-[#1E42AC]" // Warna Biru kalau Draft (untuk Publish)
+        ? "border-red-500 text-red-500 hover:bg-red-500" 
+        : "border-[#1E42AC] text-[#1E42AC] hover:bg-[#1E42AC]" 
     }`}
         >
           {jobData.status?.toLowerCase() === "aktif"

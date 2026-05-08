@@ -95,7 +95,7 @@ export default function RegisterSelection() {
               {/* Icon */}
               <div className="shrink-0">{role.icon}</div>
 
-              {/* Text disamping icon */}
+              {/* Text */}
               <div className="flex flex-col">
                 <p style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '16px', color: '#000000' }}>
                   {role.label}

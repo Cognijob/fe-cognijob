@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
+
 import EmailIconImg from '../assets/AuthPages/EmailIcon.png'
 import LockIconImg from '../assets/AuthPages/LockIcon.png'
 import UserIconImg from '../assets/AuthPages/UserIcon.png'
@@ -49,27 +51,12 @@ function InputField({ icon, placeholder, type = 'text', name, value, onChange, r
         onKeyDown={onKeyDown}
         inputMode={inputMode}
         className="flex-1 bg-transparent outline-none"
-        style={{ fontFamily: 'Poppins', fontSize: '14px', color: '#9197A8' }}
+        style={{ fontFamily: 'Poppins', fontSize: '14px', color: '#333' }}
       />
       {rightEl && rightEl}
     </div>
   )
 }
-
-const EyeIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9197A8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-)
-
-const EyeOffIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9197A8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-    <line x1="1" y1="1" x2="23" y2="23"/>
-  </svg>
-)
 
 export default function Register() {
   const { role } = useParams()
@@ -105,12 +92,10 @@ export default function Register() {
       className="h-screen w-full flex items-center justify-center px-4 overflow-hidden"
       style={{ background: bgGradient }}
     >
-      {/* Card Utama */}
       <div
         className="relative w-full max-w-md flex flex-col px-8 py-6 max-h-[95vh] overflow-y-auto scrollbar-hide"
         style={cardStyle}
       >
-        {/* Tombol Back */}
         <button
           onClick={() => navigate('/register')}
           className="absolute top-6 left-6 hover:opacity-60 transition-opacity"
@@ -120,7 +105,6 @@ export default function Register() {
           </svg>
         </button>
 
-        {/* Judul */}
         <h2
           className="text-center mt-4 mb-2"
           style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '18px', color: '#000000' }}
@@ -128,7 +112,6 @@ export default function Register() {
           Mari Bergabung dengan CogniJob
         </h2>
 
-        {/* Subtitle */}
         <p
           className="text-center mb-4"
           style={{ fontFamily: 'Poppins', fontWeight: 400, fontSize: '14px', color: '#000000' }}
@@ -174,13 +157,15 @@ export default function Register() {
             value={form.password}
             onChange={handleChange}
             rightEl={
-              <button onClick={() => setShowPw(!showPw)} className="shrink-0 outline-none">
-                {showPw ? <EyeOffIcon /> : <EyeIcon />}
+              <button 
+                onClick={() => setShowPw(!showPw)} 
+                className="shrink-0 outline-none text-[#9197A8] hover:text-[#0B173D] transition-colors"
+              >
+                {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             }
           />
 
-          {/* Khusus Job Seeker */}
           {!isRecruiter && (
             <>
               <InputField
@@ -203,7 +188,6 @@ export default function Register() {
             </>
           )}
 
-          {/* Khusus Recruiter */}
           {isRecruiter && (
             <InputField
               icon={CompanyIconImg}
@@ -215,7 +199,6 @@ export default function Register() {
           )}
         </div>
 
-        {/* Teks Tambahan */}
         {!isRecruiter && (
           <p
             className="w-full mb-6 text-left"
@@ -225,7 +208,6 @@ export default function Register() {
           </p>
         )}
 
-        {/* Tombol Daftar */}
         <button
           onClick={handleSubmit}
           className="w-full flex items-center justify-center hover:opacity-90 transition-all mb-6 active:scale-[0.98]"
@@ -234,7 +216,6 @@ export default function Register() {
           Daftar
         </button>
 
-        {/* Link Login */}
         <p
           className="text-center"
           style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', color: '#000000' }}

@@ -51,7 +51,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Kolom Kanan: Gambar Landing */}
+        {/* Gambar landing */}
         <div className="w-[300px] h-[400px] flex items-center justify-center relative">
           <img
             src={HeroImg}
@@ -61,7 +61,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* STATS DENGAN GARIS PEMISAH YANG LEBIH TEBAL (SAMA DENGAN NAVBAR) */}
+      {/* STATS  */}
       <div className="w-full border-t-2 border-black/30 mt-12">
         <div className="max-w-[1280px] mx-auto px-16 grid grid-cols-3 pb-12 pt-10">
           
