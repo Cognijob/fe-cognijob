@@ -84,8 +84,15 @@ export default function Register() {
   }
 
   const handleSubmit = () => {
-    console.log('Register as', role, form)
-  }
+    console.log('Register as', role, form);
+    
+    // Logika navigasi berdasarkan role
+    if (isRecruiter) {
+      navigate('/recruiter/dashboard');
+    } else {
+      navigate('/jobseeker/joblisting');
+    }
+  };
 
   return (
     <div
@@ -208,6 +215,7 @@ export default function Register() {
           </p>
         )}
 
+
         <button
           onClick={handleSubmit}
           className="w-full flex items-center justify-center hover:opacity-90 transition-all mb-6 active:scale-[0.98]"
@@ -221,9 +229,13 @@ export default function Register() {
           style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', color: '#000000' }}
         >
           Sudah punya akun?{' '}
-          <a href="/login" className="font-semibold hover:underline" style={{ color: '#1E42AC' }}>
+          <button 
+          onClick={() => navigate('/login')} 
+          className="font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer" 
+          style={{ color: '#1E42AC' }}
+        >
             Masuk di sini
-          </a>
+          </button>
         </p>
       </div>
     </div>
