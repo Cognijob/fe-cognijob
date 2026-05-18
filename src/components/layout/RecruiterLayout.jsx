@@ -123,7 +123,7 @@ export default function RecruiterLayout() {
       <aside className="w-[260px] bg-[#0B173D] text-white fixed h-full flex flex-col z-50 shadow-xl">
         <div className="h-[80px] px-6 flex flex-col justify-center border-b border-white/10 w-full shrink-0">
           <h1 className="text-2xl font-bold text-white cursor-pointer" onClick={() => navigate('/recruiter/dashboard')}>
-            Cogni<span className="text-[#1E42AC]">Job</span>
+            Cogni<span className="text-[#FFFFFF]">Job</span>
           </h1>
         </div>
 
