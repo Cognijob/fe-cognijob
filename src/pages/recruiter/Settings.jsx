@@ -25,13 +25,30 @@ export default function Settings() {
   const [showConfirmPw, setShowConfirmPw] = useState(false)
 
   // --- HANDLER FUNGSI ---
+
+  // Nilai bawaan (default) khusus untuk preferences
+  const DEFAULT_PREFERENCES = {
+    emailNotif: true,
+    marketingNotif: false
+  }
+
+  // Fungsi untuk mengembalikan input email ke email yang terdaftar
+  const handleResetEmail = () => {
+    setFormData(prev => ({ ...prev, email: savedData.email }))
+  }
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleDiscardChanges = () => {
-    // Kembalikan semua ke data yang terakhir disimpan
-    setFormData({ ...savedData })
+    // Kembalikan nama & email ke data yang terakhir disimpan, 
+    // tapi kembalikan preferences ke nilai DEFAULT (true & false)
+    setFormData({ 
+      ...savedData,
+      emailNotif: DEFAULT_PREFERENCES.emailNotif,
+      marketingNotif: DEFAULT_PREFERENCES.marketingNotif
+    })
     setConfirmPassword(savedData.password)
     setIsSecurityEditing(false)
     setShowNewPw(false)
@@ -146,8 +163,11 @@ export default function Settings() {
                     className="w-full bg-white border-none rounded-xl px-4 py-3 text-[14px] font-medium text-[#111C2D] outline-none focus:ring-2 focus:ring-[#1D42AC]/30 shadow-sm"
                   />
                 </div>
+                
                 <div className="flex flex-col gap-2">
                   <label className="text-[11px] font-bold text-[#B4B2A9] uppercase tracking-wider">EMAIL ADDRESS</label>
+                  
+                  {/* Input Email Normal */}
                   <input 
                     type="email" 
                     placeholder="contoh@email.com"
@@ -155,9 +175,17 @@ export default function Settings() {
                     onChange={(e) => handleChange('email', e.target.value)}
                     className="w-full bg-white border-none rounded-xl px-4 py-3 text-[14px] font-medium text-[#111C2D] outline-none focus:ring-2 focus:ring-[#1D42AC]/30 shadow-sm"
                   />
-                  <div className="flex items-center gap-1.5 mt-0.5">
+                  
+                  {/* Teks Primary Verified Address yang bisa diklik untuk reset */}
+                  <div 
+                    onClick={handleResetEmail}
+                    title="Klik untuk mengembalikan ke email yang terdaftar"
+                    className="flex items-center gap-1.5 mt-0.5 cursor-pointer hover:opacity-75 transition-opacity w-fit group"
+                  >
                     <CheckCircle2 size={12} className="text-[#3525CD]" />
-                    <span className="text-[11px] text-[#3525CD] font-medium">Primary Verified Address</span>
+                    <span className="text-[11px] text-[#3525CD] font-medium group-hover:underline">
+                      Primary Verified Address 
+                    </span>
                   </div>
                 </div>
               </div>
@@ -222,7 +250,7 @@ export default function Settings() {
                   <p className="text-[10px] text-gray-500 mt-0.5">Password must be at least 12 characters and include a symbol.</p>
                 </div>
 
-                {/* Tombol Update Credentials (Selalu Tampil Tapi Nonaktif Jika Tidak Mode Edit) */}
+                {/* Tombol Update Credentials */}
                 <button 
                   onClick={handleUpdateSecurity}
                   disabled={!isSecurityEditing}

@@ -27,6 +27,8 @@ import ProfileFilled from './pages/JobSeeker/ProfileFilled'
 import EditProfileForm from './pages/JobSeeker/EditProfileForm'
 import Notif from './pages/JobSeeker/Notif'
 import MessagesJob from './pages/JobSeeker/MessagesJob'
+import Companies from './pages/JobSeeker/Companies'
+import ApplicantStatus from './pages/JobSeeker/ApplicantStatus';
 
 const PlaceholderPage = ({ title }) => (
   <div className="p-6 bg-white rounded-2xl shadow-sm border border-black/5 animate-fade-in">
@@ -74,9 +76,9 @@ function App() {
           {/* Default page: /jobseeker/joblisting */}
           <Route path="joblisting" element={<DashboardJobseeker />} />
           {/* Placeholder untuk menu lainnya */}
-          <Route path="companies" element={<PlaceholderPage title="Companies" />} />
+          <Route path="companies" element={<Companies />} />
           <Route path="messages" element={<MessagesJob />} />
-          <Route path="status" element={<PlaceholderPage title="Applicant Status" />} />
+          <Route path="/jobseeker/status" element={<ApplicantStatus />} />
           <Route path="notifications" element={<Notif />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profileform" element={<ProfileFilled />} />
