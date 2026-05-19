@@ -29,6 +29,8 @@ import Notif from './pages/JobSeeker/Notif'
 import MessagesJob from './pages/JobSeeker/MessagesJob'
 import Companies from './pages/JobSeeker/Companies'
 import ApplicantStatus from './pages/JobSeeker/ApplicantStatus';
+import DetailJobListing from './pages/JobSeeker/DetailJobListing'
+import LamarJob from './pages/JobSeeker/LamarJob';
 
 const PlaceholderPage = ({ title }) => (
   <div className="p-6 bg-white rounded-2xl shadow-sm border border-black/5 animate-fade-in">
@@ -84,6 +86,8 @@ function App() {
           <Route path="profileform" element={<ProfileFilled />} />
           <Route path="profileempty" element={<ProfileEmpty />} />
           <Route path="editprofileform" element={<EditProfileForm />} />
+          <Route path="/jobseeker/joblisting/:id" element={<DetailJobListing />} />
+          <Route path="joblisting/:id/lamar" element={<LamarJob />} />
           
         </Route>
 

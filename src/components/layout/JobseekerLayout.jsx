@@ -10,6 +10,7 @@ export default function JobseekerLayout() {
     { path: '/jobseeker/companies', label: 'Companies', icon: <Building2 size={20} /> },
     { path: '/jobseeker/messages', label: 'Messages', icon: <Mail size={20} /> },
     { path: '/jobseeker/status', label: 'Applicant Status', icon: <BriefcaseBusiness size={20} /> },
+    
   ]
 
   const getBreadcrumbs = () => {
@@ -18,6 +19,10 @@ export default function JobseekerLayout() {
       'companies': 'Companies',
       'messages': 'Messages',
       'status': 'Applicant Status',
+      'profile': 'Profile',
+      'notifications': 'Notifications',
+      'lamar': 'Lamar'
+    
     };
 
     const segments = location.pathname.split('/').filter(x => x && x !== 'jobseeker');
@@ -25,26 +30,38 @@ export default function JobseekerLayout() {
     return (
       <div className="flex items-center">
         <span className="text-[#B4B2A9] font-bold text-[18px]">Job Seeker</span>
-        {segments.map((name, index) => {
+      {segments.map((name, index) => {
           const isLast = index === segments.length - 1;
-          const displayName = breadcrumbMap[name.toLowerCase()] || name.charAt(0).toUpperCase() + name.slice(1);
+          const prevSegment = segments[index - 1];
+          
+          let displayName = breadcrumbMap[name.toLowerCase()] || name.charAt(0).toUpperCase() + name.slice(1);
+
+          if (prevSegment === 'joblisting' && !isNaN(name)) {
+            // Jika ini bukan yang terakhir (misal kita lagi di page /lamar), 
+            // kita tetap butuh nama jobTitle-nya
+            displayName = location.state?.jobTitle || "Detail Pekerjaan";
+}
+
+          // MEMPERBAIKI PATH NAVIGASI:
+          // Supaya link-nya absolut dan membawa data 'state' judul pekerjaan
+          const urlPath = `/jobseeker/${segments.slice(0, index + 1).join('/')}`;
 
           return (
-            <span key={name} className="flex items-center">
+            <span key={urlPath} className="flex items-center">
               <span className="mx-2 font-normal text-[18px] text-[#B4B2A9]">&gt;</span>
               {isLast ? (
                 <span className="text-[#0B173D] font-bold text-[18px]">{displayName}</span>
               ) : (
                 <span 
                   className="cursor-pointer hover:text-[#0B173D] transition-colors font-bold text-[18px] text-[#B4B2A9]"
-                  onClick={() => navigate(`/jobseeker/${name}`)}
+                  onClick={() => navigate(urlPath, { state: location.state })} // Tambahkan state di sini
                 >
                   {displayName}
                 </span>
               )}
             </span>
           );
-        })}
+      })}
       </div>
     );
   };

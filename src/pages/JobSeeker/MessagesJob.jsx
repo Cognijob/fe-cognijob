@@ -82,7 +82,7 @@ export default function MessagesJob() {
   return (
     <div className="flex h-[calc(100vh-80px)] overflow-hidden bg-white font-poppins animate-fade-in">
       {/* SIDEBAR CHAT */}
-      <div className="w-[350px] border-r border-black/5 flex flex-col bg-white">
+      <div className="w-[350px] border-r border-black/50 flex flex-col bg-white">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-[#0B173D] mb-4">Pesan</h1>
           <div className="relative">
@@ -95,7 +95,7 @@ export default function MessagesJob() {
               placeholder="Cari percakapan..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 bg-[#FBFAFF] border border-[#CDD6EE] rounded-xl outline-none focus:border-[#6B5BAE]/50 text-sm transition-all"
+              className="w-full pl-11 pr-4 py-2.5 bg-[#FFFFFF] border border-[#1E42AC] rounded-xl outline-none focus:border-[#1E42AC]/50 text-sm transition-all"
             />
           </div>
         </div>
@@ -110,10 +110,10 @@ export default function MessagesJob() {
                 key={chat.id}
                 onClick={() => setSelectedChat(chat)}
                 className={`p-4 mx-4 mb-2 flex items-center gap-3 cursor-pointer rounded-2xl transition-all
-                  ${isActive ? "bg-[#F3F1FB] border border-[#6B5BAE]/20" : "hover:bg-gray-50"}`}
+                  ${isActive ? "bg-[#F1F4FF] border border-[#6B5BAE]/20" : "hover:bg-gray-50"}`}
               >
                 <div
-                  className={`w-12 h-12 rounded-full ${chat.color} flex items-center justify-center font-bold text-[#6B5BAE] shrink-0 shadow-sm text-sm`}
+                  className={`w-12 h-12 rounded-full ${chat.color} flex items-center justify-center font-bold text-[#0B173D] shrink-0 shadow-sm text-sm`}
                 >
                   {chat.avatar}
                 </div>
@@ -127,13 +127,13 @@ export default function MessagesJob() {
                     </span>
                   </div>
                   <p
-                    className={`text-[12px] truncate ${isActive ? "text-[#6B5BAE] font-medium" : "text-gray-500"}`}
+                    className={`text-[12px] truncate ${isActive ? "text-[#1E42AC] font-medium" : "text-gray-500"}`}
                   >
                     {lastMsg?.text || "Belum ada pesan"}
                   </p>
                 </div>
                 {chat.id === 2 && !isActive && (
-                  <div className="w-5 h-5 bg-[#6B5BAE] rounded-full flex items-center justify-center text-white text-[10px] font-bold">
+                  <div className="w-5 h-5 bg-[#1E42AC] rounded-full flex items-center justify-center text-white text-[10px] font-bold">
                     2
                   </div>
                 )}
@@ -144,13 +144,13 @@ export default function MessagesJob() {
       </div>
 
       {/* CHAT AREA KANAN */}
-      <div className="flex-1 flex flex-col bg-[#FBFAFF]">
+      <div className="flex-1 flex flex-col bg-[#F1F4FF]">
         {selectedChat ? (
           <>
             {/* Header Chat */}
             <div className="h-[75px] px-8 flex items-center bg-white border-b border-black/5 shadow-sm z-10">
               <div
-                className={`w-10 h-10 rounded-full ${selectedChat.color} mr-4 flex items-center justify-center font-bold text-[#6B5BAE] text-xs shadow-inner`}
+                className={`w-10 h-10 rounded-full ${selectedChat.color} mr-4 flex items-center justify-center font-bold text-[#1E42AC] text-xs shadow-inner`}
               >
                 {selectedChat.avatar}
               </div>
@@ -181,8 +181,8 @@ export default function MessagesJob() {
                   <div
                     className={`max-w-[70%] p-4 text-[13px] leading-relaxed shadow-sm transition-all ${
                       msg.sender === "me"
-                        ? "bg-[#6B5BAE] text-white rounded-2xl rounded-tr-none"
-                        : "bg-white text-[#0B173D] border border-[#CDD6EE] rounded-2xl rounded-tl-none"
+                        ? "bg-[#1E42AC] text-white rounded-2xl rounded-tr-none"
+                        : "bg-white text-[#0B173D] border border-[#1E42AC] rounded-2xl rounded-tl-none"
                     }`}
                   >
                     {msg.text}
@@ -195,10 +195,10 @@ export default function MessagesJob() {
             </div>
 
             {/* Input Pesan Footer */}
-            <div className="p-6 bg-white border-t border-black/5">
+            <div className="p-6 bg-white border-t border-black/10">
               <form
                 onSubmit={handleSendMessage}
-                className="flex gap-3 bg-[#FBFAFF] p-2 rounded-2xl border border-[#CDD6EE] focus-within:border-[#6B5BAE]/50 transition-all"
+                className="flex gap-3 bg-[#F1F4FF] p-2 rounded-2xl border border-[#1E42AC] focus-within:border-[#F1F4FF]/50 transition-all"
               >
                 <input
                   type="text"
@@ -209,7 +209,7 @@ export default function MessagesJob() {
                 />
                 <button
                   type="submit"
-                  className="bg-[#6B5BAE] p-2.5 rounded-xl text-white hover:bg-[#5a4c9a] shadow-md hover:shadow-lg transition-all active:scale-95"
+                  className="bg-[#1E42AC] p-2.5 rounded-xl text-white hover:bg-[#5a4c9a] shadow-md hover:shadow-lg transition-all active:scale-95"
                 >
                   <Send size={18} />
                 </button>
@@ -221,7 +221,7 @@ export default function MessagesJob() {
             <div className="w-32 h-32 bg-[#F3F1FB] rounded-full flex items-center justify-center mb-6 shadow-inner">
               <Send
                 size={48}
-                className="-rotate-12 text-[#6B5BAE] opacity-40"
+                className="-rotate-12 text-[#1E42AC] opacity-40"
               />
             </div>
             <h3 className="font-bold text-[#0B173D] text-[18px] mb-2">
