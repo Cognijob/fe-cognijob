@@ -1,10 +1,9 @@
 import React from 'react';
-import { Search, MapPin, ChevronDown, Clock } from 'lucide-react';
+import { Search, MapPin, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function DashboardJobseeker() {
   const navigate = useNavigate();
-  
 
   const jobs = [
     { id: 1, title: "Senior Backend Engineer", company: "TechCogni Indonesia", location: "Jakarta", level: "Senior", type: "Full-time", salary: "Rp 18-28 Juta/Bulan", posted: "Dibuka 3 hari lalu" },
@@ -36,7 +35,7 @@ export default function DashboardJobseeker() {
           <p className="font-bold text-[15px] mb-3">Filter Lowongan Pekerjaan Berdasarkan:</p>
           <div className="flex justify-center gap-4">
             {['Semua Lokasi', 'Semua Skill', 'Semua Level'].map((filter) => (
-              <button key={filter} className="flex items-center justify-between w-[160px] px-4 py-2 bg-white border-1 border-[#1E42AC] rounded-full text-[#1E42AC] font-semibold text-[13px] shadow-sm">
+              <button key={filter} className="flex items-center justify-between w-[160px] px-4 py-2 bg-white border border-[#1E42AC] rounded-full text-[#1E42AC] font-semibold text-[13px] shadow-sm">
                 {filter} <ChevronDown size={16} />
               </button>
             ))}
@@ -49,7 +48,7 @@ export default function DashboardJobseeker() {
             <h2 className="font-bold text-[18px]">Direkomendasikan Untukmu</h2>
             <button className="text-[#1E42AC] text-[13px] font-semibold underline">Lihat Semua</button>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {jobs.slice(0, 3).map((job) => (
               <div key={job.id} className="bg-white border-2 border-[#CDD6EE] rounded-[20px] p-5 shadow-sm">
                 <div className="w-12 h-12 bg-[#112664] rounded-xl flex items-center justify-center text-white font-bold text-xl mb-4">TN</div>
@@ -69,14 +68,14 @@ export default function DashboardJobseeker() {
             <h2 className="font-bold text-[18px]">Jelajahi Lowongan Aktif</h2>
             <button className="text-[#1E42AC] text-[13px] font-semibold underline">Lihat Semua</button>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {jobs.map((job) => (
               <div key={job.id} className="bg-white border-2 border-[#CDD6EE] rounded-[20px] p-5 shadow-sm flex flex-col">
                 <div className="flex gap-3 mb-4">
                   <div className="w-12 h-12 bg-[#112664] rounded-xl flex items-center justify-center text-white font-bold text-xl shrink-0">TN</div>
                   <div>
                     <h3 className="font-bold text-[14px] text-[#0B173D] leading-tight">{job.title}</h3>
-                    <p className="text-gray-300 text-[11px]">{job.company}</p>
+                    <p className="text-gray-400 text-[11px]">{job.company}</p>
                   </div>
                 </div>
                 
@@ -90,8 +89,8 @@ export default function DashboardJobseeker() {
                 <div className="mt-auto flex justify-between items-center">
                   <span className="text-[#98BDEA] text-[10px] italic">{job.posted}</span>
                   <button 
-                    onClick={() => navigate(`/jobseeker/job/${job.id}`)}
-                    className="border-1 border-[#1E42AC] text-[#1E42AC] px-5 py-1 rounded-lg shadow-md text-[12px] font-bold hover:bg-[#1E42AC] hover:text-white transition-all"
+                    onClick={() => navigate(`/jobseeker/joblisting/${job.id}`, { state: { jobTitle: job.title } })}
+                    className="border border-[#1E42AC] text-[#1E42AC] px-5 py-1 rounded-lg shadow-md text-[12px] font-bold hover:bg-[#1E42AC] hover:text-white transition-all"
                   >
                     Lamar
                   </button>
