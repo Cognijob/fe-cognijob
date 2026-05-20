@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import LockIconImg from '../assets/AuthPages/LockIcon.png'
 import EmailIconImg from '../assets/AuthPages/EmailIcon.png'
 import { Eye, EyeOff } from 'lucide-react';
+import { login } from '../services/authServices' // API
 
 // Gradient bg
 const bgGradient = 'linear-gradient(180deg, #E6CDEE 25.96%, #D6CDEE 50.48%, #CDD6EE 77.88%)'
@@ -64,23 +65,59 @@ export default function Login() {
   const [view, setView] = useState('login') 
   const [showPw, setShowPw] = useState(false)
   const [isError, setIsError] = useState(false) 
+  const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
     email: '',
     password: '',
   })
+
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
     if (isError) setIsError(false) 
   }
 
-  const handleLogin = () => {
-    if (form.email === '' || form.password === '') {
-      setIsError(true)
-      return
-    }
-    navigate('/recruiter/dashboard')
+  const handleLogin = async (e) => {
+  if (e) e.preventDefault();
+  
+  if (!form.email || !form.password) {
+    setIsError(true);
+    return;
   }
+
+  setLoading(true);
+  setIsError(false);
+
+  try {
+    // Fungsi otomatis menyimpan token & user ke localStorage
+    const response = await login(form);
+    
+    // Cek apakah respons memiliki data yang valid
+    if (response) {
+      // Ambil role langsung dari data user yang sudah dihandle oleh helper
+      const userRole = response.data?.user?.role || response.user?.role;
+      
+      console.log("Login sukses, role terdeteksi:", userRole);
+
+    if (userRole === 'recruiter') {
+      console.log("Mencoba pindah ke /recruiter/dashboard");
+      navigate('/recruiter/dashboard');
+    } else if (userRole === 'job_seeker' || userRole === 'jobseeker') {
+      console.log("Mencoba pindah ke /jobseeker/joblisting");
+      navigate('/jobseeker/joblisting');
+    } else {
+            alert("Role tidak dikenali oleh sistem.");
+          }
+        }
+      } catch (error) {
+        console.error("Login Error:", error);
+        setIsError(true);
+        // Alert untuk feedback ke user
+        alert("Email atau kata sandi salah!");
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const handleResetPassword = () => {
     console.log('Reset link sent to:', form.email)

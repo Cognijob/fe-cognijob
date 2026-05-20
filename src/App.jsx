@@ -5,6 +5,7 @@ import LandingPage from './pages/LandingPage'
 import RegisterSelection from './pages/RegisterSelection'
 import Register from './pages/Register'
 import Login from './pages/Login' 
+import ProtectedRoute from './components/ProtectedRoute'
 
 // Import layout & page recruiter
 import RecruiterLayout from './components/layout/RecruiterLayout'
@@ -44,40 +45,31 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* ================= RUTE PUBLIK ================= */}
-        {/* Halaman utama atau Landing Page */}
         <Route path="/" element={<LandingPage />} />
-        
-        {/* Alur Login */}
         <Route path="/login" element={<Login />} />
-        
-        {/* Alur Registrasi */}
         <Route path="/register" element={<RegisterSelection />} />
         <Route path="/register/:role" element={<Register />} />
 
 
         {/* ================= RUTE DASHBOARD RECRUITER ================= */}
-        {/* Semua rute di dalam grup ini akan dibungkus oleh RecruiterLayout 
-            yang berisi Sidebar statis di sebelah kiri.
-        */}
-        <Route path="/recruiter" element={<RecruiterLayout />}>
-          {/* Default landing page untuk recruiter: /recruiter/dashboard */}
-          <Route path="dashboard" element={<DashboardOverview />} />
-          {/* Menu manajemen lainnya*/}
-          <Route path="jobs" element={<Jobs />} />
-          <Route path="jobs/job/:id" element={<JobDetail />} />
-          <Route path="create-job" element={<CreateJob />} />
-          <Route path="edit-job/:id" element={<EditJob />} />
-          <Route path="applicants" element={<ApplicantManagement />} />
-          <Route path="messages" element={<Messages />} />
-          <Route path="company-profile" element={<CompanyProfile />} />
-          <Route path="settings" element={<Settings />} />
+        <Route element={<ProtectedRoute allowedRoles={['recruiter']} />}>
+          <Route path="/recruiter" element={<RecruiterLayout />}>
+            <Route path="dashboard" element={<DashboardOverview />} />
+            <Route path="jobs" element={<Jobs />} />
+            <Route path="jobs/job/:id" element={<JobDetail />} />
+            <Route path="create-job" element={<CreateJob />} />
+            <Route path="edit-job/:id" element={<EditJob />} />
+            <Route path="applicants" element={<ApplicantManagement />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="company-profile" element={<CompanyProfile />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
         </Route>
 
           {/* RUTE DASHBOARD JOB SEEKER */}
+        <Route element={<ProtectedRoute allowedRoles={['job_seeker', 'jobseeker']} />}>
           <Route path="/jobseeker" element={<JobseekerLayout />}>
-          {/* Default page: /jobseeker/joblisting */}
           <Route path="joblisting" element={<DashboardJobseeker />} />
-          {/* Placeholder untuk menu lainnya */}
           <Route path="companies" element={<Companies />} />
           <Route path="messages" element={<MessagesJob />} />
           <Route path="/jobseeker/status" element={<ApplicantStatus />} />
@@ -88,7 +80,7 @@ function App() {
           <Route path="editprofileform" element={<EditProfileForm />} />
           <Route path="/jobseeker/joblisting/:id" element={<DetailJobListing />} />
           <Route path="joblisting/:id/lamar" element={<LamarJob />} />
-          
+          </Route>
         </Route>
 
 

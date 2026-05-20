@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import jobSeekerImg from "../assets/AuthPages/JobSeeker.png";
 import RecruiterImg from '../assets/AuthPages/Recruiter.png';
-import { Weight } from 'lucide-react';
 
 const bgGradient = 'linear-gradient(180deg, #E6CDEE 25.96%, #D6CDEE 50.48%, #CDD6EE 77.88%)'
 
@@ -18,6 +17,9 @@ const roleCardBase = {
   border: '1px solid #B9C4E5',
   boxShadow: '0px 4px 4px rgba(0,0,0,0.25)',
   borderRadius: '10px',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease',
+  width: '100%' // Memastikan card memenuhi grid
 }
 
 const roleCardActive = {
@@ -41,19 +43,25 @@ const roles = [
     key: 'job-seeker',
     label: 'Job Seeker',
     desc: 'Temukan pekerjaan dan lamar secara anonim.',
-    icon: <img src={jobSeekerImg} alt="Job Seeker" width={52} height={52} />,
+    icon: jobSeekerImg,
   },
   {
     key: 'recruiter',
     label: 'Recruiter',
     desc: 'Pasang lowongan kerja dan rekrut talenta.',
-    icon: <img src={RecruiterImg} alt="Recruiter" width={52} height={52} />,
+    icon: RecruiterImg,
   },
 ]
 
 export default function RegisterSelection() {
-  const [selected, setSelected] = useState(null)
+  // Nama state harus konsisten digunakan di bawah
+  const [selectedRole, setSelectedRole] = useState('job-seeker'); 
   const navigate = useNavigate()
+
+  const handleLanjut = () => {
+    // Navigasi ke /register/job-seeker atau /register/recruiter
+    navigate(`/register/${selectedRole}`);
+  };
 
   return (
     <div
@@ -69,8 +77,14 @@ export default function RegisterSelection() {
           onClick={() => navigate('/')}
           className="absolute top-8 left-8 hover:opacity-60 transition-opacity"
         >
-          <svg width="24" height="25" viewBox="0 1 24 24" fill="none">
-            <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#0B173D" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg width="24" height="25" viewBox="0 0 24 24" fill="none">
+            <path 
+              d="M19 12H5M5 12L12 19M5 12L12 5" 
+              stroke="#0B173D" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
 
@@ -87,20 +101,23 @@ export default function RegisterSelection() {
           {roles.map((role) => (
             <button
               key={role.key}
-              onClick={() => setSelected(role.key)}
-              
-              className="flex flex-row items-center gap-2 p-2 text-left transition-all"
-              style={selected === role.key ? roleCardActive : roleCardBase}
+              type="button"
+              onClick={() => setSelectedRole(role.key)}
+              className="flex flex-row items-center gap-2 p-2 text-left"
+              // Pastikan membandingkan dengan selectedRole (bukan selected)
+              style={selectedRole === role.key ? roleCardActive : roleCardBase}
             >
               {/* Icon */}
-              <div className="shrink-0">{role.icon}</div>
+              <div className="shrink-0">
+                <img src={role.icon} alt={role.label} width={52} height={52} />
+              </div>
 
               {/* Text */}
               <div className="flex flex-col">
-                <p style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '16px', color: '#000000' }}>
+                <p style={{ fontFamily: 'Poppins', fontWeight: 500, fontSize: '14px', color: '#000000' }}>
                   {role.label}
                 </p>
-                <p style={{ fontFamily: 'Poppins', fontWeight: 400, fontSize: '9px', color: '#767D93', lineHeight: '16px' }}>
+                <p style={{ fontFamily: 'Poppins', fontWeight: 400, fontSize: '9px', color: '#767D93', lineHeight: '14px' }}>
                   {role.desc}
                 </p>
               </div>
@@ -110,14 +127,9 @@ export default function RegisterSelection() {
 
         {/* CTA Button */}
         <button
-          onClick={() => selected && navigate(`/register/${selected}`)}
-          disabled={!selected}
-          className="w-full flex items-center justify-center hover:opacity-80 transition-opacity mb-8"
-          style={{
-            ...btnPrimary,
-            opacity: selected ? 1 : 0.5,
-            cursor: selected ? 'pointer' : 'not-allowed',
-          }}
+          onClick={handleLanjut}
+          className="w-full flex items-center justify-center hover:opacity-90 transition-opacity mb-8 active:scale-[0.98]"
+          style={btnPrimary}
         >
           Lanjut Daftar Akun
         </button>

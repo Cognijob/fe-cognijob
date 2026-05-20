@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { registerJobSeeker, registerRecruiter } from '../services/authServices';
 import { useNavigate, useParams } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 
@@ -62,6 +63,7 @@ export default function Register() {
   const { role } = useParams()
   const navigate = useNavigate()
   const isRecruiter = role === 'recruiter'
+    const [loading, setLoading] = useState(false);
 
   const [showPw, setShowPw] = useState(false)
   const [form, setForm] = useState({
@@ -83,16 +85,58 @@ export default function Register() {
     }
   }
 
-  const handleSubmit = () => {
-    console.log('Register as', role, form);
-    
-    // Logika navigasi berdasarkan role
-    if (isRecruiter) {
-      navigate('/recruiter/dashboard');
-    } else {
-      navigate('/jobseeker/joblisting');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    let response;
+if (isRecruiter) {
+  // Payload sesuai struktur Recruiter
+  const recruiterPayload = {
+    firstName: "Admin",    
+    lastName: "Recruiter", 
+    email: form.email,
+    password: form.password,
+    companyMode: "new",
+    newCompany: {
+      companyName: form.company,
+      industry: "Technology",      
+      location: "Jakarta",         
+      workplaceTag: "Hybrid",      
+      description: "Perusahaan yang sedang berkembang" 
     }
   };
+
+  console.log("Mengirim payload recruiter:", recruiterPayload);
+  response = await registerRecruiter(recruiterPayload);
+} else {
+      // Job Seeker
+      const seekerPayload = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        password: form.password,
+        gender: "female",
+        age: 20,
+        location: form.location,
+        whatsappNumber: form.whatsapp 
+      };
+      response = await registerJobSeeker(seekerPayload);
+    }
+
+    if (response) {
+      alert("Registrasi Berhasil!");
+      navigate('/login');
+    }
+  } catch (error) {
+    const errorDetail = error.response?.data;
+    console.error("Error Detail:", errorDetail);
+    alert(errorDetail?.message || "Registrasi gagal, cek console F12");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div
