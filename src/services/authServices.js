@@ -1,0 +1,43 @@
+import axios from 'axios';
+import { saveToken, saveUser } from '../utils/storage';
+
+const api = axios.create({
+  baseURL: 'https://be-cognijob.vercel.app' 
+});
+
+// Helper
+const handleAuthResponse = (response) => {
+  const data = response.data;
+  if (data.token) {
+    saveToken(data.token);
+  }
+  const user = data.data?.user || data.user;
+  if (user) {
+    saveUser(user);
+  }
+  return data;
+};
+
+
+export const registerJobSeeker = async (userData) => {
+  const response = await api.post('/auth/register/job-seeker', userData);
+  return handleAuthResponse(response);
+};
+
+export const registerRecruiter = async (userData) => {
+  const response = await api.post('/auth/register/recruiter', userData);
+  return handleAuthResponse(response);
+};
+
+export const login = async (credentials) => {
+  try {
+    const response = await api.post('/auth/login', credentials);
+    // Simpan token ke auth_token 
+    if (response.data.token) {
+        localStorage.setItem('auth_token', response.data.token);
+    }
+    return handleAuthResponse(response); 
+  } catch (error) {
+    throw error;
+  }
+};
