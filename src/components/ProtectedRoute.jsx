@@ -20,8 +20,8 @@ const ProtectedRoute = ({ allowedRoles }) => {
     return <Navigate to="/" replace />;
   }
 
-  // Jika semua lolos, tampilkan halaman
+  // Jika semua lolos, tampilkan halaman 
   return <Outlet />;
-};
+}; 
 
 export default ProtectedRoute;

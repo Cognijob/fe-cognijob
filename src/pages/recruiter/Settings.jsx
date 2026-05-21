@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { User, Lock, Sliders, Mail, Megaphone, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
+import { User, Lock, Sliders, Mail, Megaphone, Eye, EyeOff, CheckCircle2, AlertTriangle } from 'lucide-react'
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('account')
@@ -8,7 +8,7 @@ export default function Settings() {
   const [savedData, setSavedData] = useState({
     fullName: "Marcus Chen",
     email: "MarcusChen@gmail.com",
-    password: "CognijobSecret123!", // <-- Password lama tersimpan
+    password: "CognijobSecret123!",
     emailNotif: true,
     marketingNotif: false,
   })
@@ -18,21 +18,19 @@ export default function Settings() {
   
   // --- STATE UNTUK SECURITY ---
   const [isSecurityEditing, setIsSecurityEditing] = useState(false)
-  // Confirm password diisi otomatis sama dengan password awal
   const [confirmPassword, setConfirmPassword] = useState(savedData.password) 
-  
   const [showNewPw, setShowNewPw] = useState(false)
   const [showConfirmPw, setShowConfirmPw] = useState(false)
 
-  // --- HANDLER FUNGSI ---
+  // --- STATE UNTUK POP UP WARNING ---
+  const [showWarning, setShowWarning] = useState(false)
 
-  // Nilai bawaan (default) khusus untuk preferences
+  // --- HANDLER FUNGSI ---
   const DEFAULT_PREFERENCES = {
     emailNotif: true,
     marketingNotif: false
   }
 
-  // Fungsi untuk mengembalikan input email ke email yang terdaftar
   const handleResetEmail = () => {
     setFormData(prev => ({ ...prev, email: savedData.email }))
   }
@@ -41,9 +39,7 @@ export default function Settings() {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleDiscardChanges = () => {
-    // Kembalikan nama & email ke data yang terakhir disimpan, 
-    // tapi kembalikan preferences ke nilai DEFAULT (true & false)
+  const confirmDiscardChanges = () => {
     setFormData({ 
       ...savedData,
       emailNotif: DEFAULT_PREFERENCES.emailNotif,
@@ -53,27 +49,24 @@ export default function Settings() {
     setIsSecurityEditing(false)
     setShowNewPw(false)
     setShowConfirmPw(false)
+    setShowWarning(false) 
   }
 
   const handleSaveChanges = () => {
-    // Simpan semua data tab Account & Preferences
     setSavedData({ ...formData })
     alert("Perubahan pengaturan berhasil disimpan!")
   }
 
   const handleUpdateSecurity = () => {
-    // Validasi Minimal 12 Karakter
     if (!formData.password || formData.password.length < 12) {
       alert("Password minimal 12 karakter!")
       return
     }
-    // Validasi Kesesuaian Password
     if (formData.password !== confirmPassword) {
       alert("Gagal menyimpan! Password dan Confirm Password tidak cocok.")
       return
     }
     
-    // Simpan password ke state "database"
     setSavedData(prev => ({ ...prev, password: formData.password }))
     alert("Kredensial keamanan berhasil diperbarui!")
     setConfirmPassword(formData.password)
@@ -84,7 +77,6 @@ export default function Settings() {
 
   const toggleEditSecurity = () => {
     if (isSecurityEditing) {
-      // Jika batal edit, kembalikan input ke password yang tersimpan
       setFormData(prev => ({ ...prev, password: savedData.password }))
       setConfirmPassword(savedData.password)
       setShowNewPw(false)
@@ -102,8 +94,53 @@ export default function Settings() {
   }
 
   return (
-    <div className="w-full flex flex-col min-h-screen pb-10 animate-fade-in font-poppins">
+    <div className="w-full flex flex-col min-h-screen pb-10 animate-fade-in font-poppins relative">
       
+      {/* --- POP UP / MODAL DISCARD CHANGES --- */}
+      {showWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B173D]/40 backdrop-blur-sm animate-fade-in px-4">
+          
+          <div className="bg-white w-full max-w-[400px] rounded-[16px] shadow-2xl p-8 flex flex-col items-center text-center animate-scale-up">
+            
+            {/* Ikon Peringatan (Lebih Proporsional) */}
+            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-5">
+              <AlertTriangle className="text-[#AD4141]" size={32} />
+            </div>
+
+            {/* Teks Judul */}
+            <h3 className="text-[18px] font-bold text-[#AD4141] mb-2">
+              Buang Semua Perubahan?
+            </h3>
+
+            {/* Teks Deskripsi */}
+            <p className="text-[14px] text-gray-600 font-medium mb-8 leading-relaxed">
+              Semua perubahan yang belum disimpan akan hilang.
+            </p>
+
+            {/* Tombol Aksi */}
+            <div className="flex gap-3 w-full">
+              {/* Tombol Kembali */}
+              <button 
+                onClick={() => setShowWarning(false)}
+                className="flex-1 py-2.5 rounded-lg text-[13px] font-semibold text-gray-700 bg-white border border-[#AD4141] hover:bg-red-50 transition-colors"
+              >
+                Kembali
+              </button>
+
+              {/* Tombol Buang Perubahan */}
+              <button 
+                onClick={confirmDiscardChanges}
+                className="flex-1 py-2.5 rounded-lg text-[13px] font-semibold bg-[#AD4141] text-white hover:opacity-90 transition-opacity shadow-sm"
+              >
+                Buang Perubahan
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
       <div className="w-full max-w-[1000px] mx-auto px-8 pt-8">
         
         {/* PAGE TITLE */}
@@ -167,7 +204,6 @@ export default function Settings() {
                 <div className="flex flex-col gap-2">
                   <label className="text-[11px] font-bold text-[#B4B2A9] uppercase tracking-wider">EMAIL ADDRESS</label>
                   
-                  {/* Input Email Normal */}
                   <input 
                     type="email" 
                     placeholder="contoh@email.com"
@@ -176,7 +212,6 @@ export default function Settings() {
                     className="w-full bg-white border-none rounded-xl px-4 py-3 text-[14px] font-medium text-[#111C2D] outline-none focus:ring-2 focus:ring-[#1D42AC]/30 shadow-sm"
                   />
                   
-                  {/* Teks Primary Verified Address yang bisa diklik untuk reset */}
                   <div 
                     onClick={handleResetEmail}
                     title="Klik untuk mengembalikan ke email yang terdaftar"
@@ -207,7 +242,6 @@ export default function Settings() {
               </div>
 
               <div className="flex flex-col gap-4 max-w-[512px]">
-                {/* Input Password (Lama & Baru) */}
                 <div className="flex flex-col gap-2">
                   <label className="text-[11px] font-bold text-[#B4B2A9] uppercase tracking-wider">NEW PASSWORD</label>
                   <div className="relative">
@@ -228,7 +262,6 @@ export default function Settings() {
                   </div>
                 </div>
 
-                {/* Input Confirm Password */}
                 <div className="flex flex-col gap-2">
                   <label className="text-[11px] font-bold text-[#B4B2A9] uppercase tracking-wider">CONFIRM PASSWORD</label>
                   <div className="relative">
@@ -250,7 +283,6 @@ export default function Settings() {
                   <p className="text-[10px] text-gray-500 mt-0.5">Password must be at least 12 characters and include a symbol.</p>
                 </div>
 
-                {/* Tombol Update Credentials */}
                 <button 
                   onClick={handleUpdateSecurity}
                   disabled={!isSecurityEditing}
@@ -312,8 +344,8 @@ export default function Settings() {
             {/* ACTION BUTTONS */}
             <div className="flex items-center justify-end gap-5 mt-2 pt-6">
               <button 
-                onClick={handleDiscardChanges}
-                className="text-[14px] font-semibold text-[#0B173D] hover:text-[#1D42AC] transition-all duration-300"
+                onClick={() => setShowWarning(true)}
+                className="text-[14px] font-semibold text-[#0B173D] hover:text-[#AD4141] transition-all duration-300"
               >
                 Buang Semua Perubahan
               </button>

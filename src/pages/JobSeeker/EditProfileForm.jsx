@@ -261,6 +261,7 @@ export default function EditProfileForm({
       email, totalExperience, photoFile,
       skills, interests, workExperiences, achievements, volunteering,
       cvFile,
+      cvFileName // <--- TAMBAHKAN VARIABEL INI AGAR SISTEM TAHU FILE DIHAPUS ATAU TIDAK
     });
   };
 

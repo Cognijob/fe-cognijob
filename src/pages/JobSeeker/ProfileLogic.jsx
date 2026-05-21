@@ -4,60 +4,29 @@ import axios from "axios";
 import ProfileEmpty from "./ProfileEmpty";
 import ProfileFilled from "./ProfileFilled";
 
-// ─── API ─────────────────────────────────────────────────────────────────────
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
-
 const profileApi = {
-  /** GET /profile – fetch current user's profile */
   getProfile: () => axios.get(`${BASE_URL}/profile`),
 };
-// ─────────────────────────────────────────────────────────────────────────────
 
-// ─── MOCK (hapus setelah BE siap) ────────────────────────────────────────────
 const USE_MOCK = true;
 
-const MOCK_PROFILE = {
-  fullName: "Rayanka Sadira Jiwita",
-  location: "Jakarta Timur, Indonesia",
-  currentPosition: "Fresh Graduate",
-  lastEducation: "SI Sistem Informasi",
-  email: "rayanka@email.com",
-  totalExperience: "1 Tahun",
+// 1. KITA BUAT DATA BAWAANNYA KOSONG TOTAL
+const EMPTY_PROFILE = {
+  fullName: "",
+  location: "",
+  currentPosition: "",
+  lastEducation: "",
+  email: "",
+  totalExperience: "",
   photoUrl: null,
-  cvUrl: "https://example.com/cv.pdf",
-  skills: ["Python", "Django", "Docker", "REST API", "PostgreSQL", "Git"],
-  interests: ["Arsitektur Sistem", "Skalabilitas & Performa", "Keamanan & Keandalan"],
-  workExperiences: [
-    {
-      company: "TechCogni Indonesia",
-      position: "Backend Engineer",
-      type: "Full Time",
-      period: "Jan 2023 – Sekarang",
-      description:
-        "Merancang dan mengimplementasikan pipeline pemrosesan data real-time yang menangani lebih dari 100 juta event per hari.",
-    },
-    {
-      company: "TechVision Indonesia",
-      position: "Junior Developer",
-      type: "Full Time",
-      period: "Jun 2022 – Des 2022",
-      description:
-        "Bertanggung jawab membantu pengembangan dan pemeliharaan aplikasi, memperbaiki bug.",
-    },
-  ],
-  achievements: [
-    { title: "AWS Certified Solutions Architect", organizer: "Amazon Web Services", year: "2023" },
-    { title: "Top Innovator Award", organizer: "TechVision Indonesia", year: "2023" },
-  ],
-  volunteering: [
-    {
-      organization: "Code For Good",
-      role: "Mentor & Open Source Contributor",
-      description: "Mengajarkan pengembangan web kepada anak muda kurang mampu.",
-    },
-  ],
+  cvUrl: null,
+  skills: [],
+  interests: [],
+  workExperiences: [],
+  achievements: [],
+  volunteering: [],
 };
-// ─────────────────────────────────────────────────────────────────────────────
 
 function ProfileSkeleton() {
   return (
@@ -79,35 +48,37 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-useEffect(() => {
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-
-      if (USE_MOCK) {
-        setProfile(MOCK_PROFILE);
-        setLoading(false); // ← tambah ini
-        return;
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        if (USE_MOCK) {
+          // 2. CEK LOCALSTORAGE: Jika ada data tersimpan, pakai itu. Jika tidak, pakai data kosong.
+          const savedProfile = localStorage.getItem("mock_jobseeker_profile");
+          if (savedProfile) {
+            setProfile(JSON.parse(savedProfile));
+          } else {
+            setProfile(EMPTY_PROFILE);
+          }
+          setLoading(false);
+          return;
+        }
+        
+        const { data } = await profileApi.getProfile();
+        setProfile(data);
+      } catch (err) {
+        setError("Gagal memuat data profil.");
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchProfile();
+  }, []);
 
-      const { data } = await profileApi.getProfile();
-      setProfile(data);
-    } catch (err) {
-      console.error("Failed to fetch profile:", err);
-      setError("Gagal memuat data profil.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchProfile();
-}, []);
+  const handleEdit = () => navigate("/jobseeker/editprofile");
 
-  const handleEdit = () => navigate("/job-seeker/profile/edit");
-
-  const isEmpty =
-    !profile?.fullName &&
-    !profile?.skills?.length &&
-    !profile?.workExperiences?.length;
+  // Jika nama, skill, dan pengalaman kosong, maka dianggap benar-benar kosong
+  const isEmpty = !profile?.fullName && !profile?.skills?.length && !profile?.workExperiences?.length;
 
   if (loading) return <ProfileSkeleton />;
 
@@ -115,16 +86,12 @@ useEffect(() => {
     return (
       <div className="p-8 flex flex-col items-center justify-center gap-3 text-center">
         <p className="text-red-500 font-medium">{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="text-sm text-[#1e2d5a] underline"
-        >
-          Coba lagi
-        </button>
+        <button onClick={() => window.location.reload()} className="text-sm text-[#1e2d5a] underline">Coba lagi</button>
       </div>
     );
   }
 
+  // Jika kosong, tampilkan gambar 1 (ProfileEmpty), jika terisi tampilkan gambar 2 (ProfileFilled)
   return isEmpty ? (
     <ProfileEmpty onEdit={handleEdit} />
   ) : (
