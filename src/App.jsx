@@ -22,10 +22,8 @@ import CompanyProfile from "./pages/recruiter/CompanyProfile";
 // Import Job Seeker
 import JobseekerLayout from './components/layout/JobseekerLayout' 
 import DashboardJobseeker from './pages/JobSeeker/DashboardJobseeker'
-import Profile from './pages/JobSeeker/ProfileEmpty'
-import ProfileEmpty from './pages/JobSeeker/ProfileEmpty'
-import ProfileFilled from './pages/JobSeeker/ProfileFilled'
-import EditProfileForm from './pages/JobSeeker/EditProfileForm'
+import ProfileLogic from './pages/JobSeeker/ProfileLogic'
+import EditProfileLogic from './pages/JobSeeker/EditProfileLogic'
 import Notif from './pages/JobSeeker/Notif'
 import MessagesJob from './pages/JobSeeker/MessagesJob'
 import Companies from './pages/JobSeeker/Companies'
@@ -74,10 +72,8 @@ function App() {
           <Route path="messages" element={<MessagesJob />} />
           <Route path="/jobseeker/status" element={<ApplicantStatus />} />
           <Route path="notifications" element={<Notif />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="profileform" element={<ProfileFilled />} />
-          <Route path="profileempty" element={<ProfileEmpty />} />
-          <Route path="editprofileform" element={<EditProfileForm />} />
+          <Route path="profile" element={<ProfileLogic />} />
+          <Route path="editprofile" element={<EditProfileLogic />} />
           <Route path="/jobseeker/joblisting/:id" element={<DetailJobListing />} />
           <Route path="joblisting/:id/lamar" element={<LamarJob />} />
           </Route>
