@@ -1,46 +1,58 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import axios from "axios";
+import { useNavigate, useParams } from "react-router-dom";
+import { getJobDetail, updateJob } from "../../services/jobServices";
 import { ChevronDown } from "lucide-react";
 
 export default function EditJob() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { id } = useParams();
-  const selectedJob = location.state?.job;
 
   const [jobData, setJobData] = useState({
-    posisi: "",
-    deskripsi: "",
-    kualifikasi: "",
-    lokasi: "",
-    tipe: "",
-    gaji: "",
-    status: "",
+    title: "",
+    description: "",
+    requirements: "",
+    location: "",
+    employmentType: "Full-time",
+    salaryRange: "",
+    status: "draft",
   });
 
-  // Ambil data job berdasarkan ID
-useEffect(() => {
-  if (location.state?.job) {
-    const selectedJob = location.state.job;
+  // Ambil data terbaru dari API 
+  useEffect(() => {
+    const fetchJob = async () => {
+      try {
+        const response = await getJobDetail(id);
+        const jobDataFromApi = response.data.data; 
+        setJobData({
+          title: jobDataFromApi.title || "",
+          description: jobDataFromApi.description || "",
+          requirements: jobDataFromApi.requirements || "",
+          location: jobDataFromApi.location || "",
+          employmentType: jobDataFromApi.employmentType || "Full-time",
+          salaryRange: jobDataFromApi.salaryRange || "",
+          status: jobDataFromApi.status || "draft",
+        });
+        } catch (err) {
+          console.error("Gagal ambil data:", err);
+      }
+    };
+    fetchJob();
+  }, [id]);
 
-    setJobData({
-      posisi: selectedJob.title || "",
-      deskripsi: selectedJob.deskripsi || "",
-      kualifikasi: selectedJob.kualifikasi || "",
-      lokasi: selectedJob.lokasi || "",
-      tipe: selectedJob.tipe || "",
-      gaji: selectedJob.gaji || "",
-      status: selectedJob.status || "",
-    });
-  }
-}, [location.state]);
+  const handleStatusChange = async (newStatus) => {
+    try {
+      // update statusnya
+      const updatedData = { ...jobData, status: newStatus };
+      await updateJob(id, updatedData);
+      navigate("/recruiter/jobs");
+    } catch (err) {
+      alert("Gagal memperbarui status");
+    }
+  };
 
-  // Simpan perubahan
   const handleSave = async () => {
     try {
-      await axios.put(`/api/jobs/${id}`, jobData);
-      alert("Data berhasil diperbarui!");
+      await updateJob(id, jobData);
       navigate("/recruiter/jobs");
     } catch (err) {
       alert("Gagal menyimpan perubahan");
@@ -79,9 +91,9 @@ const handlePrimaryAction = () => {
             <input
               type="text"
               placeholder="Masukkan posisi pekerjaan"
-              value={jobData.posisi}
+              value={jobData.title}
               onChange={(e) =>
-                setJobData({ ...jobData, posisi: e.target.value })
+                setJobData({ ...jobData, title: e.target.value })
               }
               className="w-full px-4 py-3 rounded-lg border border-white bg-white text-[#0B173D] focus:outline-none focus:ring-2 focus:ring-[#1E42AC]/20 transition-all"
             />
@@ -94,9 +106,9 @@ const handlePrimaryAction = () => {
             </label>
             <textarea
               rows="4"
-              value={jobData.deskripsi}
+              value={jobData.description}
               onChange={(e) =>
-                setJobData({ ...jobData, deskripsi: e.target.value })
+                setJobData({ ...jobData, description: e.target.value })
               }
               placeholder="Penjelasan mengenai tanggung jawab, harapan, dan konteks pekerjaan..."
               className="w-full px-4 py-3 rounded-lg border border-white bg-white text-[#0B173D] focus:outline-none focus:ring-2 focus:ring-[#1E42AC]/20 transition-all resize-none"
@@ -110,9 +122,9 @@ const handlePrimaryAction = () => {
             </label>
             <textarea
               rows="3"
-              value={jobData.kualifikasi}
+              value={jobData.requirements}
               onChange={(e) =>
-                setJobData({ ...jobData, kualifikasi: e.target.value })
+                setJobData({ ...jobData, requirements: e.target.value })
               }
               placeholder="Kualifikasi"
               className="w-full px-4 py-3 rounded-lg border border-white bg-white text-[#0B173D] focus:outline-none focus:ring-2 focus:ring-[#1E42AC]/20 transition-all resize-none"
@@ -127,9 +139,9 @@ const handlePrimaryAction = () => {
               </label>
               <input
                 type="text"
-                value={jobData.lokasi}
+                value={jobData.location}
                 onChange={(e) =>
-                  setJobData({ ...jobData, lokasi: e.target.value })
+                  setJobData({ ...jobData, location: e.target.value })
                 }
                 placeholder="Jakarta"
                 className="w-full px-4 py-3 rounded-lg border border-white bg-white text-[#0B173D] focus:outline-none focus:ring-2 focus:ring-[#1E42AC]/20 transition-all"
@@ -143,9 +155,9 @@ const handlePrimaryAction = () => {
 
               <div className="relative">
                 <select
-                  value={jobData.tipe}
+                  value={jobData.employmentType}
                   onChange={(e) =>
-                    setJobData({ ...jobData, tipe: e.target.value })
+                    setJobData({ ...jobData, employmentType: e.target.value })
                   }
                   className="w-full px-4 py-3 rounded-lg border border-white bg-white text-[#0B173D] focus:outline-none focus:ring-2 focus:ring-[#1E42AC]/20 transition-all appearance-none cursor-pointer"
                 >
@@ -169,9 +181,9 @@ const handlePrimaryAction = () => {
             </label>
             <input
               type="text"
-              value={jobData.gaji}
+              value={jobData.salaryRange}
               onChange={(e) =>
-                setJobData({ ...jobData, gaji: e.target.value })
+                setJobData({ ...jobData, salaryRange: e.target.value })
               }
               placeholder="Rp15-25 juta/bulan"
               className="w-full px-4 py-3 rounded-lg border border-white bg-white text-[#0B173D] focus:outline-none focus:ring-2 focus:ring-[#1E42AC]/20 transition-all"
@@ -183,16 +195,16 @@ const handlePrimaryAction = () => {
       {/* Tombol Aksi */}
       <div className="flex justify-center gap-4 mt-8">
         <button
-          onClick={handlePrimaryAction}
+          onClick={() => handleStatusChange(jobData.status === 'published' ? 'closed' : 'published')}
           className={`px-10 py-2 rounded-lg border font-bold bg-white transition-all duration-300 hover:text-white hover:shadow-lg ${
-      jobData.status?.toLowerCase() === "aktif"
-        ? "border-red-500 text-red-500 hover:bg-red-500" 
-        : "border-[#1E42AC] text-[#1E42AC] hover:bg-[#1E42AC]" 
-    }`}
+            jobData.status?.toLowerCase() === "published"
+              ? "border-red-500 text-red-500 hover:bg-red-500" 
+              : "border-[#1E42AC] text-[#1E42AC] hover:bg-[#1E42AC]" 
+          }`}
         >
-          {jobData.status?.toLowerCase() === "aktif"
-          ? "Tutup Lowongan"
-          : "Publikasikan Lowongan"}
+          {jobData.status?.toLowerCase() === "published"
+            ? "Tutup Lowongan"
+            : "Publikasikan Lowongan"}
         </button>
 
         <button

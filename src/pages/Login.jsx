@@ -77,47 +77,51 @@ export default function Login() {
     if (isError) setIsError(false) 
   }
 
-  const handleLogin = async (e) => {
-  if (e) e.preventDefault();
-  
-  if (!form.email || !form.password) {
-    setIsError(true);
-    return;
-  }
-
-  setLoading(true);
-  setIsError(false);
-
-  try {
-    // Fungsi otomatis menyimpan token & user ke localStorage
-    const response = await login(form);
+const handleLogin = async (e) => {
+    if (e) e.preventDefault();
     
-    // Cek apakah respons memiliki data yang valid
-    if (response) {
-      // Ambil role langsung dari data user yang sudah dihandle oleh helper
-      const userRole = response.data?.user?.role || response.user?.role;
-      
-      console.log("Login sukses, role terdeteksi:", userRole);
+    if (!form.email || !form.password) {
+      setIsError(true);
+      return;
+    }
 
-    if (userRole === 'recruiter') {
-      console.log("Mencoba pindah ke /recruiter/dashboard");
-      navigate('/recruiter/dashboard');
-    } else if (userRole === 'job_seeker' || userRole === 'jobseeker') {
-      console.log("Mencoba pindah ke /jobseeker/joblisting");
-      navigate('/jobseeker/joblisting');
-    } else {
-            alert("Role tidak dikenali oleh sistem.");
-          }
-        }
-      } catch (error) {
-        console.error("Login Error:", error);
-        setIsError(true);
-        // Alert untuk feedback ke user
-        alert("Email atau kata sandi salah!");
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    setIsError(false);
+
+    try {
+      const response = await login(form);
+      
+      // Pastikan token tersimpan
+      if (response && response.token) {
+        localStorage.setItem('auth_token', response.token);
       }
-    };
+
+      // DEBUG: Lihat apa isi response-nya
+      console.log("DEBUG RESPONSE:", response);
+
+      // Ambil user dari data yang dikembalikan
+      // Biasanya authService handleAuthResponse mengembalikan data
+      const user = response.data?.user || response.user;
+      localStorage.setItem('auth_token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(user)); // PASTIKAN USER DISIMPAN
+      console.log("Data user disimpan ke storage:", user);
+      const userRole = user?.role;
+
+      if (userRole === 'recruiter') {
+        navigate('/recruiter/dashboard');
+      } else if (userRole === 'job_seeker' || userRole === 'jobseeker') {
+        navigate('/jobseeker/joblisting');
+      } else {
+        alert("Login berhasil, tapi role tidak ditemukan: " + userRole);
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      setIsError(true);
+      alert("Email atau kata sandi salah!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleResetPassword = () => {
     console.log('Reset link sent to:', form.email)
