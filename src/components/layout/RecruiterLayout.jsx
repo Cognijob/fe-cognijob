@@ -28,70 +28,71 @@ export default function RecruiterLayout() {
     { path: '/recruiter/settings', label: 'Settings', icon: SettingIcon },
   ]
 
-  const getBreadcrumbs = () => {
-    const breadcrumbMap = {
-      'dashboard': 'Dashboard',
-      'jobs': 'Job Management',
-      'applicants': 'Applicant Management',
-      'messages': 'Messages',
-      'company-profile': 'Company Profile',
-      'settings': 'Settings',
-      'create-job': 'Buat Lowongan Baru',
-      'edit-job': 'Edit Lowongan',
-      'job': 'Detail Lowongan'
-    };
-
-    // Ambil semua segmen path kecuali 'recruiter' dan ID unik (JOB-XXX)
-    const segments = location.pathname.split('/').filter(x => x && x !== 'recruiter' && !x.toUpperCase().includes('JOB-'));
-
-    return (
-      <div className="flex items-center">
-        {/* ROOT: Recruiter (Warna Abu-abu & Bisa diklik) */}
-        <span className="text-[#B4B2A9] font-bold text-[18px]">Recruiter</span>
-        
-        {/* INJEKSI OTOMATIS: Sisipkan Job Management jika di halaman Edit/Create */}
-        {(location.pathname.includes('edit-job') || location.pathname.includes('create-job')) && (
-          <span className="flex items-center">
-            <span className="mx-2 font-normal text-[18px] text-[#B4B2A9]">&gt;</span>
-            <span 
-              className="cursor-pointer hover:text-[#0B173D] transition-colors font-bold text-[18px] text-[#B4B2A9]"
-              onClick={() => navigate('/recruiter/jobs')}
-            >
-              Job Management
-            </span>
-          </span>
-        )}
-
-        {/* RENDER SEGMEN URL */}
-        {segments.map((name, index) => {
-          // Jangan tampilkan 'jobs' lagi jika sudah diinjeksi manual di atas agar tidak double
-          if (name === 'jobs' && (location.pathname.includes('edit-job') || location.pathname.includes('create-job'))) return null;
-          
-          const isLast = index === segments.length - 1;
-          const displayName = breadcrumbMap[name.toLowerCase()] || name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' ');
-
-          return (
-            <span key={name} className="flex items-center">
-              <span className="mx-2 font-normal text-[18px] text-[#B4B2A9]">&gt;</span>
-              
-              {isLast ? (
-                // HALAMAN AKTIF: Biru Gelap (Tidak bisa diklik)
-                <span className="text-[#0B173D] font-bold text-[18px]">{displayName}</span>
-              ) : (
-                // HALAMAN INDUK (Termasuk Dashboard): Abu-abu & Bisa diklik
-                <span 
-                  className="cursor-pointer hover:text-[#0B173D] transition-colors font-bold text-[18px] text-[#B4B2A9]"
-                  onClick={() => navigate(`/recruiter/${name}`)}
-                >
-                  {displayName}
-                </span>
-              )}
-            </span>
-          );
-        })}
-      </div>
-    );
+const getBreadcrumbs = () => {
+  const breadcrumbMap = {
+    'dashboard': 'Dashboard',
+    'jobs': 'Job Management',
+    'applicants': 'Applicant Management',
+    'messages': 'Messages',
+    'company-profile': 'Company Profile',
+    'settings': 'Settings',
+    'create-job': 'Buat Lowongan Baru',
+    'edit-job': 'Edit Lowongan',
+    'job': 'Detail Lowongan' 
   };
+
+
+  const segments = location.pathname.split('/').filter(x => 
+    x && 
+    x !== 'recruiter' && 
+    !x.toUpperCase().includes('JOB-') && 
+    !/^[0-9a-fA-F-]{20,}$/.test(x) // Mengabaikan ID panjang
+  );
+
+  return (
+    <div className="flex items-center">
+      <span className="text-[#B4B2A9] font-bold text-[18px]">Recruiter</span>
+      
+      {/* INJEKSI OTOMATIS */}
+      {(location.pathname.includes('edit-job') || location.pathname.includes('create-job') || location.pathname.includes('job/')) && (
+        <span className="flex items-center">
+          <span className="mx-2 font-normal text-[18px] text-[#B4B2A9]">&gt;</span>
+          <span 
+            className="cursor-pointer hover:text-[#0B173D] transition-colors font-bold text-[18px] text-[#B4B2A9]"
+            onClick={() => navigate('/recruiter/jobs')}
+          >
+            Job Management
+          </span>
+        </span>
+      )}
+
+      {/* RENDER SEGMEN URL */}
+      {segments.map((name, index) => {
+        // Abaikan 'jobs' 
+        if (name === 'jobs' && (location.pathname.includes('edit-job') || location.pathname.includes('create-job') || location.pathname.includes('job/'))) return null;
+        
+        const isLast = index === segments.length - 1;
+        const displayName = breadcrumbMap[name.toLowerCase()] || name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' ');
+
+        return (
+          <span key={name} className="flex items-center">
+            <span className="mx-2 font-normal text-[18px] text-[#B4B2A9]">&gt;</span>
+            {isLast ? (
+              <span className="text-[#0B173D] font-bold text-[18px]">{displayName}</span>
+            ) : (
+              <span 
+                className="cursor-pointer hover:text-[#0B173D] transition-colors font-bold text-[18px] text-[#B4B2A9]"
+                onClick={() => navigate(`/recruiter/${name}`)}
+              >
+                {displayName}
+              </span>
+            )}
+          </span>
+        );
+      })}
+    </div>
+  );
+};
 
   const renderMenuItem = (item) => {
     const isActive = location.pathname.startsWith(item.path) || 
