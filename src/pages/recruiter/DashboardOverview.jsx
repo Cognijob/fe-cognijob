@@ -14,15 +14,12 @@ export default function DashboardOverview() {
         setLoading(true);
         const response = await fetchJobs();
         
-        // Memastikan data berupa array
         const allJobs = Array.isArray(response) ? response : (response?.data?.data || response?.data || []);
         
-        // FILTER: Hanya ambil status 'published'
         const activeOnly = allJobs.filter(j => 
             j.status && j.status.toLowerCase() === 'published'
         );
         
-        // Sort berdasarkan terbaru
         const sortedJobs = [...activeOnly].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         setJobs(sortedJobs.slice(0, 5));
       } catch (err) {
@@ -75,7 +72,7 @@ export default function DashboardOverview() {
           </div>
         </div>
 
-        {/* SECTION 3: JOB TERBARU (HANYA AKTIF) */}
+        {/* SECTION 3: JOB TERBARU */}
         <div className="bg-[#DFD9F3]/40 rounded-[16px] p-6 mt-8 border border-black/5">
           <div className="mb-5">
             <h2 className="text-[22px] font-bold text-[#0B173D] leading-tight">Job Terbaru</h2>
@@ -103,7 +100,7 @@ export default function DashboardOverview() {
                     Aktif
                   </div>
                   <button
-                    onClick={() => navigate(`/recruiter/job/${job.jobId || job.id}`)}
+                    onClick={() => navigate(`/recruiter/jobs/job/${job.jobId || job.id}`)}
                     className="bg-[#1D42AC] text-white px-6 py-1.5 rounded-full text-[14px] font-semibold hover:bg-[#153285] transition-colors"
                   >
                     Buka
