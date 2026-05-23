@@ -1,20 +1,25 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import EditProfileForm from "./EditProfileForm";
+import { 
+  fetchUserProfile, 
+  updateUserProfile, 
+  uploadUserPhoto, 
+  uploadUserCV 
+} from "../../services/userServices";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
-
-const profileApi = {
-  getProfile: () => axios.get(`${BASE_URL}/profile`),
-  updateProfile: (payload) => axios.put(`${BASE_URL}/profile`, payload),
-  uploadPhoto: (file) => { /* logic upload... */ },
-  uploadCV: (file) => { /* logic upload... */ },
+// Helper untuk parse string JSON dari backend
+const safeParse = (data) => {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    if (typeof data === 'string') return data.split(',').map(s => s.trim()).filter(Boolean);
+    return [];
+  }
 };
 
-const USE_MOCK = true;
-
-// Data kosong untuk inisiasi
 const EMPTY_PROFILE = {
   fullName: "", location: "", currentPosition: "", lastEducation: "",
   email: "", totalExperience: "", photoUrl: null, cvUrl: null,
@@ -22,7 +27,7 @@ const EMPTY_PROFILE = {
   workExperiences: [], achievements: [], volunteering: [],
 };
 
-export default function EditProfile() {
+export default function EditProfileLogic() {
   const navigate = useNavigate();
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,76 +36,104 @@ export default function EditProfile() {
   const [showCancelModal, setShowCancelModal] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const loadProfile = async () => {
       try {
-        if (USE_MOCK) {
-          // Ambil data yang mungkin sudah diedit sebelumnya
-          const savedProfile = localStorage.getItem("mock_jobseeker_profile");
-          setInitialData(savedProfile ? JSON.parse(savedProfile) : EMPTY_PROFILE);
-          setLoading(false);
-          return;
+        setLoading(true);
+        const res = await fetchUserProfile();
+        
+        if (res.data && res.data.success) {
+          const userData = res.data.data;
+          const profileData = userData.profile || {};
+          
+          const workExps = safeParse(profileData.workExperience);
+
+          setInitialData({
+            fullName: userData.name || "",
+            location: userData.location || "",
+            email: userData.email || "",
+            photoUrl: userData.photoUrl || null,
+            
+            // Format CV
+            cvUrl: profileData.cvUrl || null,
+            cvFileName: profileData.cvFileName || "",
+            cvUploadedAt: profileData.cvUploadedAt 
+              ? `Diunggah ${new Date(profileData.cvUploadedAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}` 
+              : "",
+
+            // Posisi saat ini diambil dari pengalaman kerja pertama
+            currentPosition: workExps.length > 0 ? workExps[0].position || "" : "",
+            
+            skills: safeParse(profileData.skills),
+            interests: safeParse(profileData.interests),
+            workExperiences: workExps,
+            achievements: safeParse(profileData.awards),
+            volunteering: safeParse(profileData.organizationExperience),
+          });
+        } else {
+          setInitialData(EMPTY_PROFILE);
         }
-        const { data } = await profileApi.getProfile();
-        setInitialData(data);
       } catch (err) {
         console.error("Gagal fetch profile:", err);
+        setInitialData(EMPTY_PROFILE);
       } finally {
         setLoading(false);
       }
     };
-    fetchProfile();
+    loadProfile();
   }, []);
 
   const handleSave = async (formData) => {
     try {
       setSaving(true);
 
-      if (USE_MOCK) {
-        // SIMULASI SIMPAN: Masukkan data baru ke localStorage
-        const payload = {
-          fullName: formData.fullName,
-          location: formData.location,
-          currentPosition: formData.currentPosition,
-          lastEducation: formData.lastEducation,
-          email: formData.email,
-          totalExperience: formData.totalExperience,
-          skills: formData.skills,
-          interests: formData.interests,
-          workExperiences: formData.workExperiences,
-          achievements: formData.achievements,
-          volunteering: formData.volunteering,
-          
-          photoUrl: formData.photoFile ? URL.createObjectURL(formData.photoFile) : initialData.photoUrl,
-          
-          // --- PERBAIKAN LOGIKA CV DI SINI ---
-          // Jika cvFileName kosong (dihapus user), kosongkan semuanya.
-          // Jika ada cvFileName, cek apakah ada file baru. Jika ada, buat URL baru. Jika tidak, pakai URL lama.
-          cvUrl: formData.cvFileName 
-                 ? (formData.cvFile ? URL.createObjectURL(formData.cvFile) : initialData.cvUrl) 
-                 : null,
-                 
-          cvFileName: formData.cvFileName 
-                 ? (formData.cvFile ? formData.cvFile.name : initialData.cvFileName) 
-                 : "",
-                 
-          cvUploadedAt: formData.cvFileName 
-                 ? (formData.cvFile ? `Diunggah ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}` : initialData.cvUploadedAt) 
-                 : "",
-        };
-        
-        localStorage.setItem("mock_jobseeker_profile", JSON.stringify(payload));
-        
-        // Jeda 1 detik agar animasi loading terasa
-        setTimeout(() => {
-          setSaving(false);
-          setShowSuccess(true);
-        }, 1000);
+      // 1. Persiapkan payload untuk data teks (PUT /users/profile)
+      // Backend menerima firstName dan lastName secara terpisah
+      const nameParts = formData.fullName.trim().split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
 
-      } else {
-        // --- REAL API CALLS DI SINI NANTINYA ---
+      // Kita stringify data array/object agar aman disimpan ke backend database
+      const textPayload = {
+        firstName,
+        lastName,
+        location: formData.location,
+        skills: JSON.stringify(formData.skills),
+        interests: JSON.stringify(formData.interests),
+        workExperience: JSON.stringify(formData.workExperiences),
+        awards: JSON.stringify(formData.achievements),
+        organizationExperience: JSON.stringify(formData.volunteering)
+      };
+
+      // Siapkan array promises agar request bisa berjalan paralel (lebih cepat)
+      const apiCalls = [];
+
+      // Masukkan request update teks
+      apiCalls.push(updateUserProfile(textPayload));
+
+      // 2. Jika ada file foto baru, tambahkan ke request (POST /users/photo)
+      if (formData.photoFile) {
+        const photoData = new FormData();
+        photoData.append("photo", formData.photoFile);
+        apiCalls.push(uploadUserPhoto(photoData));
       }
+
+      // 3. Jika ada file CV baru, tambahkan ke request (POST /users/cv)
+      if (formData.cvFile) {
+        const cvData = new FormData();
+        cvData.append("cv", formData.cvFile);
+        apiCalls.push(uploadUserCV(cvData));
+      }
+
+      // Eksekusi semua API calls secara bersamaan
+      await Promise.all(apiCalls);
+
+      // Jika berhasil semua, tampilkan modal sukses
+      setShowSuccess(true);
+      
     } catch (err) {
-      alert("Terjadi kesalahan saat menyimpan. Coba lagi.");
+      console.error("Gagal menyimpan profil:", err);
+      alert("Terjadi kesalahan saat menyimpan data. Coba lagi nanti.");
+    } finally {
       setSaving(false);
     }
   };

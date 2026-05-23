@@ -1,31 +1,22 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import ProfileEmpty from "./ProfileEmpty";
 import ProfileFilled from "./ProfileFilled";
+import { fetchUserProfile } from "../../services/userServices";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
-const profileApi = {
-  getProfile: () => axios.get(`${BASE_URL}/profile`),
-};
-
-const USE_MOCK = true;
-
-// 1. KITA BUAT DATA BAWAANNYA KOSONG TOTAL
-const EMPTY_PROFILE = {
-  fullName: "",
-  location: "",
-  currentPosition: "",
-  lastEducation: "",
-  email: "",
-  totalExperience: "",
-  photoUrl: null,
-  cvUrl: null,
-  skills: [],
-  interests: [],
-  workExperiences: [],
-  achievements: [],
-  volunteering: [],
+// Helper untuk memastikan data yang diambil (bisa array, string CSV, atau JSON String) ter-parse dengan aman
+const safeParse = (data) => {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    // Jika formatnya comma-separated string (biasa terjadi pada skills/interests)
+    if (typeof data === 'string') {
+      return data.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    return [];
+  }
 };
 
 function ProfileSkeleton() {
@@ -42,56 +33,81 @@ function ProfileSkeleton() {
   );
 }
 
-export default function Profile() {
+export default function ProfileLogic() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const loadProfile = async () => {
       try {
         setLoading(true);
-        if (USE_MOCK) {
-          // 2. CEK LOCALSTORAGE: Jika ada data tersimpan, pakai itu. Jika tidak, pakai data kosong.
-          const savedProfile = localStorage.getItem("mock_jobseeker_profile");
-          if (savedProfile) {
-            setProfile(JSON.parse(savedProfile));
-          } else {
-            setProfile(EMPTY_PROFILE);
-          }
-          setLoading(false);
-          return;
-        }
+        const res = await fetchUserProfile();
         
-        const { data } = await profileApi.getProfile();
-        setProfile(data);
+        if (res.data && res.data.success) {
+          const userData = res.data.data;
+          const profileData = userData.profile || {};
+
+          // Mapping data backend ke format UI ProfileFilled
+          const mappedProfile = {
+            fullName: userData.name || "",
+            location: userData.location || "",
+            email: userData.email || "",
+            photoUrl: userData.photoUrl || null,
+            cvUrl: profileData.cvUrl || null,
+            
+            // Menggunakan helper agar string JSON diparse ke Array
+            skills: safeParse(profileData.skills),
+            interests: safeParse(profileData.interests),
+            workExperiences: safeParse(profileData.workExperience),
+            achievements: safeParse(profileData.awards), // mapping awards -> achievements
+            volunteering: safeParse(profileData.organizationExperience), // mapping org -> volunteering
+          };
+
+          // Ambil current position dari pekerjaan terakhir (elemen pertama di array workExperiences)
+          if (mappedProfile.workExperiences.length > 0) {
+            mappedProfile.currentPosition = mappedProfile.workExperiences[0].position || "";
+          } else {
+            mappedProfile.currentPosition = "";
+          }
+
+          setProfile(mappedProfile);
+        }
       } catch (err) {
+        console.error("Gagal memuat data profil:", err);
         setError("Gagal memuat data profil.");
       } finally {
         setLoading(false);
       }
     };
-    fetchProfile();
+
+    loadProfile();
   }, []);
 
   const handleEdit = () => navigate("/jobseeker/editprofile");
-
-  // Jika nama, skill, dan pengalaman kosong, maka dianggap benar-benar kosong
-  const isEmpty = !profile?.fullName && !profile?.skills?.length && !profile?.workExperiences?.length;
 
   if (loading) return <ProfileSkeleton />;
 
   if (error) {
     return (
-      <div className="p-8 flex flex-col items-center justify-center gap-3 text-center">
+      <div className="p-8 flex flex-col items-center justify-center gap-3 text-center min-h-[50vh]">
         <p className="text-red-500 font-medium">{error}</p>
-        <button onClick={() => window.location.reload()} className="text-sm text-[#1e2d5a] underline">Coba lagi</button>
+        <button onClick={() => window.location.reload()} className="text-sm text-[#1e2d5a] underline font-bold">
+          Coba lagi
+        </button>
       </div>
     );
   }
 
-  // Jika kosong, tampilkan gambar 1 (ProfileEmpty), jika terisi tampilkan gambar 2 (ProfileFilled)
+  // Kriteria tampilan Profile Empty:
+  // Jika Jobseeker belum mengisi skill, pengalaman kerja, CV, dan pendidikan/awards.
+  const isEmpty = 
+    !profile?.skills?.length && 
+    !profile?.workExperiences?.length && 
+    !profile?.cvUrl &&
+    !profile?.achievements?.length;
+
   return isEmpty ? (
     <ProfileEmpty onEdit={handleEdit} />
   ) : (

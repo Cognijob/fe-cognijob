@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { getToken, getUser } from '../utils/storage';
 
 const ProtectedRoute = ({ allowedRoles }) => {
-  const token = getToken();
+/*  const token = getToken();
   const user = getUser();
   
   // Debugging log untuk memastikan data terbaca
@@ -20,7 +20,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
     return <Navigate to="/" replace />;
   }
 
-  // Jika semua lolos, tampilkan halaman 
+  // Jika semua lolos, tampilkan halaman */
   return <Outlet />;
 }; 
 

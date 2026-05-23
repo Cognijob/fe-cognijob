@@ -1,81 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronDown, 
   ChevronUp, 
   Check, 
-  X
+  X,
+  Loader2
 } from 'lucide-react';
-
-// Data Mockup Persis Gambar (Menggunakan Bahasa Inggris)
-const mockApplications = [
-  {
-    id: 1,
-    company: "TechVision Indonesia",
-    title: "Senior Backend Engineer",
-    initials: "TN",
-    details: "Remote Full-time Rp 18-28 juta/bulan",
-    status: "Accepted",
-    updatedAt: "Hari Ini",
-    appliedDate: "12 April 2026",
-    bgColor: "#112664",
-    message: "Selamat! Offer sudah dikirim. Cek detail offer di Messages dan balas sebelum 29 April 2026."
-  },
-  {
-    id: 2,
-    company: "TechVision Indonesia",
-    title: "Lead UI/UX Designer",
-    initials: "TN",
-    details: "Remote Full-time Rp 15-25 juta/bulan",
-    status: "Next Stage",
-    updatedAt: "2 Mei, 10.00",
-    appliedDate: "18 April 2026",
-    bgColor: "#112664",
-    interview: {
-      date: "2 Mei 2026, 10.00",
-      type: "Video Call (Google Meet)",
-      note: "Via Google Meet. Siapkan portofolio dan pertanyaan teknikal."
-    }
-  },
-  {
-    id: 3,
-    company: "TechVision Indonesia",
-    title: "Data Analyst",
-    initials: "TN",
-    details: "Jakarta Full-time Rp 10-15 juta/bulan",
-    status: "Reviewed",
-    updatedAt: "3 Hari Lalu",
-    appliedDate: "28 April 2026, 07.45",
-    location: "Jakarta",
-    bgColor: "#112664",
-    message: "Profil kamu sedang dievluasi. Sedang Dalam Review Recruiter."
-  },
-  {
-    id: 4,
-    company: "TechVision Indonesia",
-    title: "Product Manager",
-    initials: "TN",
-    details: "Jakarta Full-time Rp 20-30 juta/bulan",
-    status: "Submitted",
-    updatedAt: "1 Hari Lalu",
-    appliedDate: "18 April 2026",
-    location: "Jakarta",
-    bgColor: "#0D1B47",
-    message: "Lamaran Terkirim. Menunggu Review. Rekruter akan menghubungi jika lolos ke tahap berikutnya."
-  },
-  {
-    id: 5,
-    company: "TechVision Indonesia",
-    title: "Frontend Developer",
-    initials: "TN",
-    details: "Remote Full-time Rp 12-18 juta/bulan",
-    status: "Rejected",
-    updatedAt: "1 Hari Lalu",
-    appliedDate: "18 April 2026",
-    location: "Jakarta",
-    bgColor: "#112664",
-    message: "Lamaran Tidak Dilanjutkan. Kamu bisa melamar ke posisi lain di TechVision Indonesia jika ada lowongan baru."
-  }
-];
+import { fetchApplications } from '../../services/jobseekerServices';
 
 // Konfigurasi Warna Status
 const statusStyles = {
@@ -87,11 +18,96 @@ const statusStyles = {
 };
 
 export default function ApplicantStatus() {
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const [activeTab, setActiveTab] = useState('All');
   const [expandedId, setExpandedId] = useState(null);
 
   const tabNames = ['All', 'Submitted', 'Reviewed', 'Next Stage', 'Accepted', 'Rejected'];
   const stepLabels = ['Submitted', 'Reviewed', 'Next Stage', 'Accepted'];
+
+  // Fetch API pada saat render pertama
+  useEffect(() => {
+    const loadApplications = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchApplications();
+        if (response.data && response.data.success) {
+          const apiData = response.data.data.applications;
+          setApplications(formatApplicationData(apiData));
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data lamaran:", err);
+        setError("Gagal memuat status lamaran. Silakan coba lagi.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadApplications();
+  }, []);
+
+  // Fungsi untuk memetakan data API ke format UI (seperti mockup awal)
+  const formatApplicationData = (apiApps) => {
+    return apiApps.map(app => {
+      // Mapping Status Backend ke UI Status
+      const statusMap = {
+        'applied': 'Submitted',
+        'submitted': 'Submitted',
+        'reviewed': 'Reviewed',
+        'next_stage': 'Next Stage',
+        'interview': 'Next Stage',
+        'accepted': 'Accepted',
+        'rejected': 'Rejected'
+      };
+      
+      const rawStatus = (app.recruiterStatus || app.applicantStatus || 'submitted').toLowerCase();
+      const mappedStatus = statusMap[rawStatus] || 'Submitted';
+
+      // Generate inisial perusahaan (Max 2 huruf)
+      const companyWords = (app.companyName || "Perusahaan").split(' ');
+      const initials = companyWords.slice(0, 2).map(w => w[0]).join('').toUpperCase();
+
+      // Format detail teks
+      const details = `${app.jobLocation || 'Remote'} ${app.jobEmploymentType || 'Full-time'}`;
+
+      // Format Tanggal (DD Bulan YYYY)
+      const appliedDateObj = new Date(app.appliedAt);
+      const appliedDateStr = appliedDateObj.toLocaleDateString('id-ID', { 
+        day: 'numeric', month: 'long', year: 'numeric' 
+      });
+      
+      // Hitung UpdatedAt relatif simpel (misal ambil tanggal/bulan)
+      const updatedDateObj = new Date(app.updatedAt);
+      const updatedAtStr = updatedDateObj.toLocaleDateString('id-ID', { 
+        day: 'numeric', month: 'short' 
+      });
+
+      // Generate pesan alert sesuai status
+      let message = "";
+      if (mappedStatus === 'Accepted') message = "Selamat! Offer sudah dikirim. Cek detail offer di Messages dan balas secepatnya.";
+      else if (mappedStatus === 'Next Stage') message = "Jadwal interview/tahap selanjutnya akan diinformasikan oleh rekruter.";
+      else if (mappedStatus === 'Reviewed') message = "Profil kamu sedang dievaluasi. Sedang Dalam Review Recruiter.";
+      else if (mappedStatus === 'Submitted') message = "Lamaran Terkirim. Menunggu Review. Rekruter akan menghubungi jika lolos ke tahap berikutnya.";
+      else message = "Lamaran Tidak Dilanjutkan. Kamu bisa melamar ke posisi lain jika ada lowongan baru.";
+
+      return {
+        id: app.applicationId,
+        company: app.companyName,
+        title: app.jobTitle,
+        initials: initials,
+        details: details,
+        status: mappedStatus,
+        updatedAt: updatedAtStr,
+        appliedDate: appliedDateStr,
+        location: app.jobLocation,
+        bgColor: "#112664", // Default warna kotak inisial
+        message: message,
+      };
+    });
+  };
 
   const getStepIndex = (status) => {
     switch (status) {
@@ -105,8 +121,8 @@ export default function ApplicantStatus() {
   };
 
   const getCount = (tab) => {
-    if (tab === 'All') return mockApplications.length;
-    return mockApplications.filter(app => app.status === tab).length;
+    if (tab === 'All') return applications.length;
+    return applications.filter(app => app.status === tab).length;
   };
 
   const tabsWithData = tabNames.map(name => ({
@@ -114,7 +130,7 @@ export default function ApplicantStatus() {
     count: getCount(name)
   }));
 
-  const filteredApps = mockApplications.filter(app => {
+  const filteredApps = applications.filter(app => {
     return activeTab === 'All' ? true : app.status === activeTab;
   });
 
@@ -122,68 +138,69 @@ export default function ApplicantStatus() {
     setExpandedId(expandedId === id ? null : id);
   };
 
+  if (loading) {
+    return (
+      <div className="w-full flex justify-center items-center min-h-screen bg-[#FBFAFF]">
+        <Loader2 className="w-10 h-10 animate-spin text-[#1E42AC]" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center min-h-screen bg-[#FBFAFF]">
+        <p className="text-[#942D0D] font-bold">{error}</p>
+        <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-[#1E42AC] text-white rounded-lg">Coba Lagi</button>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full flex flex-col min-h-screen pb-10 bg-[#FBFAFF] font-['Poppins']">
       
-      {/* KONTINER UTAMA: Disamakan dengan DashboardJobseeker (max-w-[1000px] px-8 pt-8) */}
+      {/* KONTINER UTAMA */}
       <div className="w-full max-w-[1000px] mx-auto px-8 pt-8">
         
-        {/* ========================================================
-            BAGIAN 1: KOTAK RINGKASAN STATUS
-            ======================================================== */}
+        {/* BAGIAN 1: KOTAK RINGKASAN STATUS */}
         <div className="bg-white border-2 border-[#CDD6EE] rounded-[20px] p-6 mb-8 shadow-sm">
           <h2 className="text-center font-bold text-[15px] text-[#B4B2A9] mb-5">
             Ringkasan Status Semua Lamaran Kamu
           </h2>
           <div className="flex justify-center gap-4 md:gap-8">
-            
-            {/* Box 1: Submitted */}
             <div className="flex flex-col items-center">
               <div className="w-[64px] h-[64px] bg-[#AEC9DA] bg-opacity-50 rounded-[16px] flex items-center justify-center font-bold text-[18px] text-[#4D5EA0] mb-2">
                 {getCount('Submitted')}
               </div>
               <span className="font-bold text-[11px] text-[#4D5EA0]">Submitted</span>
             </div>
-
-            {/* Box 2: Reviewed */}
             <div className="flex flex-col items-center">
               <div className="w-[64px] h-[64px] bg-[#B8ADE3] bg-opacity-40 rounded-[16px] flex items-center justify-center font-bold text-[18px] text-[#7E449A] mb-2">
                 {getCount('Reviewed')}
               </div>
               <span className="font-bold text-[11px] text-[#7E449A]">Reviewed</span>
             </div>
-
-            {/* Box 3: Next Stage */}
             <div className="flex flex-col items-center">
               <div className="w-[64px] h-[64px] bg-[#E3C25D] bg-opacity-40 rounded-[16px] flex items-center justify-center font-bold text-[18px] text-[#6C662F] mb-2">
                 {getCount('Next Stage')}
               </div>
               <span className="font-bold text-[11px] text-[#6C662F]">Next Stage</span>
             </div>
-
-            {/* Box 4: Accepted */}
             <div className="flex flex-col items-center">
               <div className="w-[64px] h-[64px] bg-[#D9ECD6] rounded-[16px] flex items-center justify-center font-bold text-[18px] text-[#328C4A] mb-2">
                 {getCount('Accepted')}
               </div>
               <span className="font-bold text-[11px] text-[#328C4A]">Accepted</span>
             </div>
-
-            {/* Box 5: Rejected */}
             <div className="flex flex-col items-center">
               <div className="w-[64px] h-[64px] bg-[#DB5D5D] bg-opacity-40 rounded-[16px] flex items-center justify-center font-bold text-[18px] text-[#942D0D] mb-2">
                 {getCount('Rejected')}
               </div>
               <span className="font-bold text-[11px] text-[#942D0D]">Rejected</span>
             </div>
-
           </div>
         </div>
 
-
-        {/* ========================================================
-            BAGIAN 2: TABS NAVIGASI
-            ======================================================== */}
+        {/* BAGIAN 2: TABS NAVIGASI */}
         <div className="flex justify-between items-center mb-6 border-b-2 border-gray-100 overflow-x-auto hide-scrollbar relative">
           {tabsWithData.map((tab) => {
             const isActive = activeTab === tab.name;
@@ -207,10 +224,7 @@ export default function ApplicantStatus() {
           })}
         </div>
 
-
-        {/* ========================================================
-            BAGIAN 3: LIST KARTU LAMARAN
-            ======================================================== */}
+        {/* BAGIAN 3: LIST KARTU LAMARAN */}
         <div className="space-y-4">
           {filteredApps.length > 0 ? (
             filteredApps.map((app) => {
@@ -219,8 +233,6 @@ export default function ApplicantStatus() {
 
               return (
                 <div key={app.id} className="bg-white border-2 border-[#CDD6EE] rounded-[20px] overflow-hidden shadow-sm transition-all duration-300">
-                  
-                  {/* CARD HEADER */}
                   <div 
                     onClick={() => toggleExpand(app.id)}
                     className="p-5 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
@@ -260,18 +272,11 @@ export default function ApplicantStatus() {
                     </div>
                   </div>
 
-                  {/* ========================================================
-                      EXPANDED ACCORDION: DETAIL PROGRESS BAR & PESAN
-                      ======================================================== */}
+                  {/* EXPANDED ACCORDION: DETAIL PROGRESS BAR & PESAN */}
                   {isExpanded && (
                     <div className="px-5 pb-6 pt-6 border-t-2 border-[#CDD6EE] animate-fade-in">
-                      
-                      {/* STEPPER PROGRESS */}
                       <div className="relative max-w-[650px] mx-auto mb-10 px-8">
-                        {/* Garis Abu-abu Dasar */}
                         <div className="absolute left-12 right-12 top-1/2 -translate-y-1/2 h-[2px] bg-gray-200"></div>
-                        
-                        {/* Garis Warna Progres */}
                         <div 
                           className="absolute left-12 top-1/2 -translate-y-1/2 h-[2px] transition-all duration-500"
                           style={{ 
@@ -307,51 +312,42 @@ export default function ApplicantStatus() {
                         </div>
                       </div>
 
-                      {/* 3 KOTAK INFO DETAIL (Dibuat responsif Grid) */}
                       <div className="mt-14 w-full max-w-[700px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-3">
-                        
-                        {/* Kotak 1 */}
                         <div className="bg-white border-2 border-[#CDD6EE] rounded-xl flex flex-col justify-center px-4 py-3 relative shadow-sm">
                           <span className="text-[10px] font-bold text-gray-400 uppercase">Dilamar</span>
-                          <span className="mt-1 text-[13px] font-bold text-[#0B173D]">{app.appliedDate.split(',')[0]}</span>
+                          <span className="mt-1 text-[13px] font-bold text-[#0B173D]">{app.appliedDate}</span>
                         </div>
-
-                        {/* Kotak 2 */}
                         <div className="bg-white border-2 border-[#CDD6EE] rounded-xl flex flex-col justify-center px-4 py-3 relative shadow-sm">
                           <span className="text-[10px] font-bold text-gray-400 uppercase">
-                            {app.status === 'Next Stage' ? 'Jadwal Interview' : (app.status === 'Submitted' ? 'Update Terakhir' : 'Deadline')}
+                            {app.status === 'Next Stage' ? 'Jadwal Interview' : 'Update Terakhir'}
                           </span>
                           <span className="mt-1 text-[13px] font-bold text-[#0B173D]">
-                            {app.interview ? app.interview.date : app.appliedDate.split(',')[1] || app.appliedDate}
+                            {app.interview ? app.interview.date : app.updatedAt}
                           </span>
                         </div>
-
-                        {/* Kotak 3 */}
                         <div className="bg-white border-2 border-[#CDD6EE] rounded-xl flex flex-col justify-center px-4 py-3 relative shadow-sm">
                           <span className="text-[10px] font-bold text-gray-400 uppercase">
-                            {app.status === 'Next Stage' ? 'Format' : (app.status === 'Submitted' ? 'Posisi' : 'Lokasi')}
+                            {app.status === 'Next Stage' ? 'Format' : 'Lokasi'}
                           </span>
                           <span className="mt-1 text-[13px] font-bold text-[#0B173D] truncate">
                             {app.interview ? app.interview.type : (app.location || app.title)}
                           </span>
                         </div>
-
                       </div>
 
-                      {/* MESSAGE ALERT BOX */}
                       <div 
                         className="mt-4 w-full max-w-[700px] mx-auto min-h-[60px] p-4 rounded-xl border-2 flex flex-col justify-center"
                         style={{ backgroundColor: statusStyles[app.status].bgLight, borderColor: statusStyles[app.status].line }}
                       >
                         <h4 className="font-bold text-[13px] mb-1" style={{ color: statusStyles[app.status].line }}>
                           {app.status === 'Accepted' ? 'Selamat! Offer sudah dikirim' : 
-                           app.status === 'Next Stage' ? `Interview Pada Tanggal ${app.interview.date}` :
+                           app.status === 'Next Stage' ? 'Informasi Tahap Selanjutnya' :
                            app.status === 'Reviewed' ? 'Sedang Dalam Review Recruiter' :
                            app.status === 'Submitted' ? 'Lamaran Terkirim. Menunggu Review.' :
                            'Lamaran Tidak Dilanjutkan.'}
                         </h4>
                         <p className="font-medium text-[11px] text-[#0B173D] leading-relaxed">
-                          {app.status === 'Next Stage' ? app.interview.note : app.message}
+                          {app.message}
                         </p>
                       </div>
 
@@ -366,7 +362,6 @@ export default function ApplicantStatus() {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
