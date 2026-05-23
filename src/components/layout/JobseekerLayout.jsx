@@ -9,7 +9,7 @@ export default function JobseekerLayout() {
     { path: '/jobseeker/joblisting', label: 'Job Listing', icon: <LayoutGrid size={20} /> },
     { path: '/jobseeker/companies', label: 'Companies', icon: <Building2 size={20} /> },
     { path: '/jobseeker/messages', label: 'Messages', icon: <Mail size={20} /> },
-    { path: '/jobseeker/status', label: 'Applicant Status', icon: <BriefcaseBusiness size={20} /> },
+    { path: '/jobseeker/applicant-status', label: 'Applicant Status', icon: <BriefcaseBusiness size={20} /> },
     
   ]
 
@@ -18,7 +18,7 @@ export default function JobseekerLayout() {
       'joblisting': 'Job Listing',
       'companies': 'Companies',
       'messages': 'Messages',
-      'status': 'Applicant Status',
+      'applicant-status': 'Applicant Status',
       'profile': 'Profile',
       'notifications': 'Notifications',
       'lamar': 'Lamar'
