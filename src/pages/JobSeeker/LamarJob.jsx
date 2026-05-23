@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { Paperclip, Plus, Trash2, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { Paperclip, Plus, Trash2, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { applyJob } from '../../services/jobseekerServices'; // Import fungsi API
 
 const LamarJob = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // id ini adalah jobId
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -13,6 +14,7 @@ const LamarJob = () => {
   const [showSuksesModal, setShowSuksesModal] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // State untuk loading submit
 
   // Data Diri state
   const [pengalamanTotal, setPengalamanTotal] = useState('');
@@ -28,10 +30,10 @@ const LamarJob = () => {
     { id: 1, namaPosit: 'Backend Engineer', perusahaan: 'Tech Startup A', tipeKerja: 'Full-time', periode: 'Jan 2023-Jan 2025' }
   ]);
 
-  const jobTitle = location.state?.jobTitle || "Senior BackEnd Engineer";
-  const jobLocation = location.state?.location || "Jakarta";
-  const jobType = location.state?.jobType || "Full-time";
-  const salary = location.state?.salary || "Rp 15-25 Juta/Bulan";
+  const jobTitle = location.state?.jobTitle || "Posisi Pekerjaan";
+  const jobLocation = location.state?.location || "Lokasi";
+  const jobType = location.state?.jobType || "Tipe";
+  const salary = location.state?.salary || "Gaji dirahasiakan";
 
   // Handlers
   const handleAddSkill = () => {
@@ -61,6 +63,8 @@ const LamarJob = () => {
   const handleFileUpload = (file) => {
     if (file && file.type === 'application/pdf' && file.size <= 5 * 1024 * 1024) {
       setUploadedFile(file);
+    } else {
+      alert("Mohon unggah file berformat PDF dengan ukuran maksimal 5MB.");
     }
   };
 
@@ -71,8 +75,40 @@ const LamarJob = () => {
     handleFileUpload(file);
   };
 
-  const handleKirimLamaran = () => {
-    setShowSuksesModal(true);
+  // --- LOGIKA UTAMA PENGIRIMAN LAMARAN ---
+  const handleKirimLamaran = async () => {
+    // Validasi simpel jika pilih upload baru tapi belum pilih file
+    if (cvOption === 'baru' && !uploadedFile) {
+      alert("Kamu memilih opsi 'Upload CV baru'. Mohon unggah CV kamu terlebih dahulu.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Simulasi URL CV (Karena fitur upload file fisik ke Cloud/Supabase mungkin belum siap)
+      // Di sistem nyata, kita akan mengupload file dulu ke bucket, ambil URL-nya, lalu masukkan ke sini.
+      const cvTautan = "https://storage.supabase.co/object/public/cv-files/dummy-cv.pdf";
+
+      const payload = {
+        jobId: id,
+        cvUrl: cvTautan,
+        isAnonymous: true // Sesuai dengan banner UI Lamaran Anonim
+      };
+
+      // Tembak API Backend
+      await applyJob(payload);
+      
+      // Jika berhasil, tampilkan modal sukses
+      setShowSuksesModal(true);
+
+    } catch (error) {
+      console.error("Gagal mengirim lamaran:", error);
+      // Tangkap pesan error spesifik dari backend (misal: "Already applied to this job")
+      const errorMessage = error.response?.data?.message || "Gagal mengirim lamaran. Silakan coba lagi.";
+      alert(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBatal = () => {
@@ -86,7 +122,8 @@ const LamarJob = () => {
 
   const handleSuksesTutup = () => {
     setShowSuksesModal(false);
-    navigate(-1);
+    // Setelah sukses, langsung arahkan ke Applicant Status agar user bisa melihat buktinya
+    navigate('/jobseeker/applicant-status');
   };
 
   return (
@@ -102,7 +139,7 @@ const LamarJob = () => {
         {/* Card Info Pekerjaan */}
         <div className="bg-white border border-[#0B173D] rounded-[20px] px-6 py-5 mb-5 flex items-center gap-5 shadow-sm">
           <div className="w-[60px] h-[60px] bg-[#112664] rounded-[10px] flex items-center justify-center text-white font-bold text-[22px] shrink-0">
-            TN
+            JOB
           </div>
           <div>
             <h2 className="text-[20px] font-bold text-black leading-tight">{jobTitle}</h2>
@@ -124,7 +161,7 @@ const LamarJob = () => {
         {/* Form Container */}
         <div className="bg-white border border-[#1E42AC] rounded-[20px] shadow-md overflow-hidden">
 
-          {/* Header Form - Tidak ikut scroll */}
+          {/* Header Form */}
           <div className="px-8 pt-7 pb-5">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-[20px] font-bold text-[#1E42AC]">Kirim Lamaran</h3>
@@ -135,12 +172,9 @@ const LamarJob = () => {
 
             {/* Radio Buttons */}
             <div className="space-y-3 mb-2">
-              {/* Opsi 1 */}
               <label
                 className={`flex items-center gap-3 px-5 py-4 border rounded-[20px] cursor-pointer transition-all ${
-                  cvOption === 'profil'
-                    ? 'border-[#1E42AC] bg-[#CDD6EE]'
-                    : 'border-[#CDD6EE] bg-white'
+                  cvOption === 'profil' ? 'border-[#1E42AC] bg-[#CDD6EE]' : 'border-[#CDD6EE] bg-white'
                 }`}
               >
                 <div
@@ -155,20 +189,14 @@ const LamarJob = () => {
                     </svg>
                   )}
                 </div>
-                <span
-                  className="text-[#09090B] font-semibold text-[15px]"
-                  onClick={() => setCvOption('profil')}
-                >
+                <span className="text-[#09090B] font-semibold text-[15px]" onClick={() => setCvOption('profil')}>
                   Gunakan CV dari profil saya
                 </span>
               </label>
 
-              {/* Opsi 2 */}
               <label
                 className={`flex items-center gap-3 px-5 py-4 border rounded-[20px] cursor-pointer transition-all ${
-                  cvOption === 'baru'
-                    ? 'border-[#1E42AC] bg-[#CDD6EE]'
-                    : 'border-[#CDD6EE] bg-white'
+                  cvOption === 'baru' ? 'border-[#1E42AC] bg-[#CDD6EE]' : 'border-[#CDD6EE] bg-white'
                 }`}
               >
                 <div
@@ -183,20 +211,15 @@ const LamarJob = () => {
                     </svg>
                   )}
                 </div>
-                <span
-                  className="text-[#09090B] font-semibold text-[15px]"
-                  onClick={() => setCvOption('baru')}
-                >
+                <span className="text-[#09090B] font-semibold text-[15px]" onClick={() => setCvOption('baru')}>
                   Upload CV baru
                 </span>
               </label>
             </div>
           </div>
 
-          {/* Scrollable Content Area */}
           <div className="px-8 pb-6">
-
-            {/* Upload Area (tampil di kedua opsi) */}
+            {/* Upload Area */}
             <div
               className={`border-2 border-dashed rounded-[20px] p-8 flex flex-col items-center justify-center transition-all cursor-pointer mb-6 ${
                 isDragging ? 'border-[#1E42AC] bg-[#EEF2FF]' : 'border-gray-300 bg-[rgba(217,217,217,0.2)]'
@@ -228,85 +251,45 @@ const LamarJob = () => {
               )}
             </div>
 
-            {/* Konten Tambahan hanya untuk "Upload CV baru" */}
+            {/* Konten Tambahan */}
             {cvOption === 'baru' && (
               <div className="space-y-7">
-
-                {/* Warning Banner */}
                 <div className="bg-[#F6EFCF] border border-[#AC7F1E] rounded-[20px] px-5 py-3">
                   <p className="text-[#AC7F1E] font-semibold text-[13px] leading-snug">
                     Karena kamu mengupload CV baru, lengkapi data berikut agar rekruter bisa menilai lamaranmu dengan benar.
                   </p>
                 </div>
 
-                {/* Data Diri */}
                 <section>
                   <h4 className="font-bold text-[#09090B] text-[16px] mb-4">Data Diri</h4>
-
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-[14px] font-semibold text-black mb-2">Pengalaman Total</label>
-                      <input
-                        type="text"
-                        placeholder="5 Tahun"
-                        value={pengalamanTotal}
-                        onChange={(e) => setPengalamanTotal(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[14px] text-[#464555] outline-none border-none"
-                      />
+                      <input type="text" placeholder="5 Tahun" value={pengalamanTotal} onChange={(e) => setPengalamanTotal(e.target.value)} className="w-full px-4 py-2.5 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[14px] text-[#464555] outline-none border-none" />
                     </div>
                     <div>
                       <label className="block text-[14px] font-semibold text-black mb-2">Lokasi</label>
-                      <input
-                        type="text"
-                        placeholder="Jakarta, Indonesia"
-                        value={lokasi}
-                        onChange={(e) => setLokasi(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[14px] text-[#464555] outline-none border-none"
-                      />
+                      <input type="text" placeholder="Jakarta, Indonesia" value={lokasi} onChange={(e) => setLokasi(e.target.value)} className="w-full px-4 py-2.5 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[14px] text-[#464555] outline-none border-none" />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-[14px] font-semibold text-black mb-2">Pendidikan Terakhir</label>
-                    <input
-                      type="text"
-                      placeholder="S1 Sistem Informasi"
-                      value={pendidikan}
-                      onChange={(e) => setPendidikan(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[14px] text-[#464555] outline-none border-none"
-                    />
+                    <input type="text" placeholder="S1 Sistem Informasi" value={pendidikan} onChange={(e) => setPendidikan(e.target.value)} className="w-full px-4 py-2.5 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[14px] text-[#464555] outline-none border-none" />
                   </div>
                 </section>
 
-                {/* Skill Utama */}
                 <section>
                   <h4 className="font-bold text-[#09090B] text-[16px] mb-3">Skill Utama</h4>
-
                   <div className="flex gap-3 mb-3">
-                    <input
-                      type="text"
-                      placeholder="Contoh: Python"
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleAddSkill()}
-                      className="flex-1 px-4 py-2.5 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[14px] text-[#464555] outline-none border-none"
-                    />
-                    <button
-                      onClick={handleAddSkill}
-                      className="flex items-center gap-1.5 px-4 py-2 border border-[#1E42AC] bg-white text-[#1E42AC] font-semibold text-[13px] rounded-[10px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] hover:bg-[#EEF2FF] transition-colors"
-                    >
-                      <Plus size={15} />
-                      Tambah
+                    <input type="text" placeholder="Contoh: Python" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAddSkill()} className="flex-1 px-4 py-2.5 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[14px] text-[#464555] outline-none border-none" />
+                    <button onClick={handleAddSkill} className="flex items-center gap-1.5 px-4 py-2 border border-[#1E42AC] bg-white text-[#1E42AC] font-semibold text-[13px] rounded-[10px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] hover:bg-[#EEF2FF] transition-colors">
+                      <Plus size={15} /> Tambah
                     </button>
                   </div>
-
                   {skills.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {skills.map((skill) => (
-                        <span
-                          key={skill}
-                          className="flex items-center gap-1.5 bg-[#CDD6EE] border border-[#1E42AC] text-[#1E42AC] px-3 py-1 rounded-[10px] text-[12px] font-semibold shadow-[0px_4px_4px_rgba(0,0,0,0.25)]"
-                        >
+                        <span key={skill} className="flex items-center gap-1.5 bg-[#CDD6EE] border border-[#1E42AC] text-[#1E42AC] px-3 py-1 rounded-[10px] text-[12px] font-semibold shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
                           {skill}
                           <button onClick={() => handleRemoveSkill(skill)} className="hover:text-red-500 transition-colors">
                             <X size={11} />
@@ -317,99 +300,71 @@ const LamarJob = () => {
                   )}
                 </section>
 
-                {/* Pengalaman Kerja */}
                 <section>
                   <h4 className="font-bold text-[#09090B] text-[16px] mb-3">Pengalaman Kerja</h4>
-
                   <div className="space-y-4">
                     {pengalamanList.map((exp, index) => (
                       <div key={exp.id} className="border border-[#1E42AC] rounded-[10px] p-5 bg-white">
                         <div className="flex justify-between items-center mb-4">
                           <p className="font-bold text-black text-[15px]">Pengalaman {index + 1}</p>
                           {pengalamanList.length > 1 && (
-                            <button
-                              onClick={() => handleRemovePengalaman(exp.id)}
-                              className="text-red-400 hover:text-red-600 transition-colors"
-                            >
+                            <button onClick={() => handleRemovePengalaman(exp.id)} className="text-red-400 hover:text-red-600 transition-colors">
                               <Trash2 size={15} />
                             </button>
                           )}
                         </div>
-
                         <div className="grid grid-cols-2 gap-3 mb-3">
                           <div>
                             <label className="block text-[13px] font-semibold text-black mb-1.5">Nama Posisi</label>
-                            <input
-                              type="text"
-                              placeholder="Backend Engineer"
-                              value={exp.namaPosit}
-                              onChange={(e) => handlePengalamanChange(exp.id, 'namaPosit', e.target.value)}
-                              className="w-full px-3 py-2 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[13px] text-[#464555] outline-none border-none"
-                            />
+                            <input type="text" placeholder="Backend Engineer" value={exp.namaPosit} onChange={(e) => handlePengalamanChange(exp.id, 'namaPosit', e.target.value)} className="w-full px-3 py-2 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[13px] text-[#464555] outline-none border-none" />
                           </div>
                           <div>
                             <label className="block text-[13px] font-semibold text-black mb-1.5">Perusahaan</label>
-                            <input
-                              type="text"
-                              placeholder="Tech Startup A"
-                              value={exp.perusahaan}
-                              onChange={(e) => handlePengalamanChange(exp.id, 'perusahaan', e.target.value)}
-                              className="w-full px-3 py-2 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[13px] text-[#464555] outline-none border-none"
-                            />
+                            <input type="text" placeholder="Tech Startup A" value={exp.perusahaan} onChange={(e) => handlePengalamanChange(exp.id, 'perusahaan', e.target.value)} className="w-full px-3 py-2 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[13px] text-[#464555] outline-none border-none" />
                           </div>
                         </div>
-
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="block text-[13px] font-semibold text-black mb-1.5">Tipe Kerja</label>
-                            <input
-                              type="text"
-                              placeholder="Full-time"
-                              value={exp.tipeKerja}
-                              onChange={(e) => handlePengalamanChange(exp.id, 'tipeKerja', e.target.value)}
-                              className="w-full px-3 py-2 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[13px] text-[#464555] outline-none border-none"
-                            />
+                            <input type="text" placeholder="Full-time" value={exp.tipeKerja} onChange={(e) => handlePengalamanChange(exp.id, 'tipeKerja', e.target.value)} className="w-full px-3 py-2 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[13px] text-[#464555] outline-none border-none" />
                           </div>
                           <div>
                             <label className="block text-[13px] font-semibold text-black mb-1.5">Periode</label>
-                            <input
-                              type="text"
-                              placeholder="Jan 2023-Jan 2025"
-                              value={exp.periode}
-                              onChange={(e) => handlePengalamanChange(exp.id, 'periode', e.target.value)}
-                              className="w-full px-3 py-2 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[13px] text-[#464555] outline-none border-none"
-                            />
+                            <input type="text" placeholder="Jan 2023-Jan 2025" value={exp.periode} onChange={(e) => handlePengalamanChange(exp.id, 'periode', e.target.value)} className="w-full px-3 py-2 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[10px] text-[13px] text-[#464555] outline-none border-none" />
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-
-                  <button
-                    onClick={handleAddPengalaman}
-                    className="flex items-center gap-1.5 mt-3 border border-[#1E42AC] bg-white text-[#1E42AC] font-semibold text-[13px] rounded-[10px] px-4 py-2 shadow-[0px_4px_4px_rgba(0,0,0,0.25)] hover:bg-[#EEF2FF] transition-colors"
-                  >
-                    <Plus size={15} />
-                    Tambah
+                  <button onClick={handleAddPengalaman} className="flex items-center gap-1.5 mt-3 border border-[#1E42AC] bg-white text-[#1E42AC] font-semibold text-[13px] rounded-[10px] px-4 py-2 shadow-[0px_4px_4px_rgba(0,0,0,0.25)] hover:bg-[#EEF2FF] transition-colors">
+                    <Plus size={15} /> Tambah
                   </button>
                 </section>
               </div>
             )}
           </div>
 
-          {/* Footer Buttons - Tidak ikut scroll */}
+          {/* Footer Buttons */}
           <div className="px-8 py-5 border-t border-gray-100 flex gap-4 bg-white">
             <button
               onClick={handleBatal}
-              className="flex-1 py-3 border border-[#1E42AC] text-black font-semibold rounded-[10px] text-[15px] hover:bg-gray-50 transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 py-3 border border-[#1E42AC] text-black font-semibold rounded-[10px] text-[15px] hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               Batal
             </button>
             <button
               onClick={handleKirimLamaran}
-              className="flex-1 py-3 bg-[#1E42AC] text-white font-semibold rounded-[10px] text-[15px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] hover:bg-[#1735a0] transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 py-3 flex justify-center items-center gap-2 bg-[#1E42AC] text-white font-semibold rounded-[10px] text-[15px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] hover:bg-[#1735a0] transition-colors disabled:opacity-80"
             >
-              Kirim Lamaran
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" /> Mengirim...
+                </>
+              ) : (
+                "Kirim Lamaran"
+              )}
             </button>
           </div>
         </div>
@@ -419,25 +374,16 @@ const LamarJob = () => {
       {showBatalModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-[20px] shadow-2xl w-full max-w-[420px] p-8 flex flex-col items-center text-center">
-            {/* Icon */}
             <div className="w-[70px] h-[70px] rounded-full bg-red-100 flex items-center justify-center mb-5">
               <AlertCircle className="text-red-600" size={38} />
             </div>
-
             <h2 className="text-[20px] font-bold text-red-600 mb-2">Batalkan Lamaran?</h2>
             <p className="text-gray-500 text-[14px] mb-8">Data yang sudah kamu isi akan hilang.</p>
-
             <div className="flex gap-4 w-full">
-              <button
-                onClick={() => setShowBatalModal(false)}
-                className="flex-1 py-3 border border-[#1E42AC] text-black font-semibold rounded-[10px] text-[14px] hover:bg-gray-50 transition-colors"
-              >
+              <button onClick={() => setShowBatalModal(false)} className="flex-1 py-3 border border-[#1E42AC] text-black font-semibold rounded-[10px] text-[14px] hover:bg-gray-50 transition-colors">
                 Kembali
               </button>
-              <button
-                onClick={handleBatalkanLamaran}
-                className="flex-1 py-3 bg-red-600 text-white font-semibold rounded-[10px] text-[14px] hover:bg-red-700 transition-colors"
-              >
+              <button onClick={handleBatalkanLamaran} className="flex-1 py-3 bg-red-600 text-white font-semibold rounded-[10px] text-[14px] hover:bg-red-700 transition-colors">
                 Batalkan Lamaran
               </button>
             </div>
@@ -449,26 +395,17 @@ const LamarJob = () => {
       {showSuksesModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-[20px] shadow-2xl w-full max-w-[420px] p-8 relative">
-            {/* Close button */}
-            <button
-              onClick={handleSuksesTutup}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-            >
+            <button onClick={handleSuksesTutup} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
               <X size={20} />
             </button>
-
             <div className="flex flex-col items-center text-center">
-              {/* Icon */}
               <div className="w-[70px] h-[70px] rounded-full bg-green-100 flex items-center justify-center mb-5">
                 <CheckCircle className="text-green-600" size={40} />
               </div>
-
               <h2 className="text-[20px] font-bold text-green-600 mb-3">Lamaranmu Berhasil Terkirim!</h2>
-
               <p className="text-gray-600 text-[14px] text-justify leading-relaxed mb-4">
                 Lamaranmu dikirim secara anonim. Rekruter akan menilaimu berdasarkan kemampuanmu. Pantau statusnya di halaman Applicant Status.
               </p>
-
               <p className="text-[#1E42AC] font-bold italic text-[14px]">Semoga Berhasil!</p>
             </div>
           </div>

@@ -36,7 +36,9 @@ import LamarJob from "./pages/JobSeeker/LamarJob";
 const PlaceholderPage = ({ title }) => (
   <div className="p-6 bg-white rounded-2xl shadow-sm border border-black/5 animate-fade-in">
     <h1 className="text-2xl font-bold text-[#0B173D]">{title}</h1>
-    <p className="text-gray-500 mt-2">Halaman ini sedang dalam tahap dev.</p>
+    <p className="text-gray-500 mt-2">
+      Halaman ini sedang dalam tahap dev.
+    </p>
   </div>
 );
 
@@ -59,39 +61,83 @@ function App() {
             <Route path="create-job" element={<CreateJob />} />
             <Route path="edit-job/:id" element={<EditJob />} />
             <Route path="applicants" element={<ApplicantManagement />} />
-              <Route path="applicants/list/:jobId" element={<ApplicantList />} />
-                <Route path="applicant/detail/:id" element={<ApplicantDetail />} />
+            <Route
+              path="applicants/list/:jobId"
+              element={<ApplicantList />}
+            />
+            <Route
+              path="applicant/detail/:id"
+              element={<ApplicantDetail />}
+            />
             <Route path="messages" element={<Messages />} />
-            <Route path="company-profile" element={<CompanyProfile />} />
+            <Route
+              path="company-profile"
+              element={<CompanyProfile />}
+            />
             <Route path="settings" element={<Settings />} />
           </Route>
         </Route>
 
-        {/* RUTE DASHBOARD JOB SEEKER */}
+        {/* ================= RUTE DASHBOARD JOB SEEKER ================= */}
         <Route
           element={
-            <ProtectedRoute allowedRoles={["job_seeker", "jobseeker"]} />
+            <ProtectedRoute
+              allowedRoles={["job_seeker", "jobseeker"]}
+            />
           }
         >
-          <Route path="/jobseeker" element={<JobseekerLayout />}>
-            <Route path="joblisting" element={<DashboardJobseeker />} />
-            <Route path="companies" element={<Companies />} />
-            <Route path="messages" element={<MessagesJob />} />
-            <Route path="/jobseeker/status" element={<ApplicantStatus />} />
-            <Route path="notifications" element={<Notif />} />
-            <Route path="profile" element={<ProfileLogic />} />
-            <Route path="editprofile" element={<EditProfileLogic />} />
+          <Route
+            path="/jobseeker"
+            element={<JobseekerLayout />}
+          >
             <Route
-              path="/jobseeker/joblisting/:id"
+              path="joblisting"
+              element={<DashboardJobseeker />}
+            />
+
+            <Route
+              path="companies"
+              element={<Companies />}
+            />
+
+            <Route
+              path="messages"
+              element={<MessagesJob />}
+            />
+
+            <Route
+              path="applicant-status"
+              element={<ApplicantStatus />}
+            />
+
+            <Route
+              path="notifications"
+              element={<Notif />}
+            />
+
+            <Route
+              path="profile"
+              element={<ProfileLogic />}
+            />
+
+            <Route
+              path="editprofile"
+              element={<EditProfileLogic />}
+            />
+
+            <Route
+              path="joblisting/:id"
               element={<DetailJobListing />}
             />
-            <Route path="joblisting/:id/lamar" element={<LamarJob />} />
+
+            <Route
+              path="joblisting/:id/lamar"
+              element={<LamarJob />}
+            />
           </Route>
         </Route>
 
-        {/* jika user mengetik URL yang salah, 
-             bisa tambahkan rute 404 di sini. 
-        */}
+        {/* jika user mengetik URL yang salah, bisa tambahkan rute 404 di sini. */}
       </Routes>
     </BrowserRouter>
   );
