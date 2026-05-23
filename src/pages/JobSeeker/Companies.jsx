@@ -1,52 +1,82 @@
-import React, { useState } from 'react';
-import { Search, MapPin, ChevronDown, ChevronLeft, Globe, Users, Calendar, Mail } from 'lucide-react';
-
-// Data Mockup - Fitur Filter
-const mockCompanies = [
-  { id: 1, name: 'TechCogni Indonesia', industry: 'Teknologi', location: 'Jakarta Selatan', size: '50 - 100 Karyawan', initials: 'TC', jobs: 5 },
-  {
-    id: 2,
-    name: 'TechVision Indonesia',
-    industry: 'Teknologi',
-    location: 'Jakarta Selatan',
-    size: '500 - 1.000 Karyawan',
-    initials: 'TN',
-    founded: 'Sejak 12 Januari 2015',
-    website: 'www.techvision.com',
-    email: 'techvision@gmail.com',
-    address: 'Sudirman Central Business Distric (SCBD), Jakarta',
-    about: 'TechVision Indonesia adalah firma teknologi terkemuka yang berbasis di Jakarta, berdedikasi untuk mendorong transformasi digital di seluruh Asia Tenggara. Kami mengkhususkan diri dalam solusi kecerdasan buatan, infrastruktur cloud berskala besar, dan pengembangan aplikasi mobile yang mengutamakan pengalaman pengguna.',
-    businessSector: 'Fokus pada pengembangan Teknologi, Software Development, dan AI Solutions.',
-    availableJobs: [
-      { id: 1, title: 'Senior Backend Engineer', type: 'Full-time', location: 'Jakarta Selatan', salary: 'Rp 18-28 Juta/Bulan' },
-      { id: 2, title: 'Lead UI/UX Designer', type: 'Full-time', location: 'Remote', salary: 'Rp 15-25 Juta/Bulan' }
-    ]
-  },
-  { id: 3, name: 'Artha Jaya Mandiri', industry: 'Keuangan', location: 'Surabaya', size: '100 - 500 Karyawan', initials: 'AJ', jobs: 2 },
-  { id: 4, name: 'Biocare Global', industry: 'Kesehatan', location: 'Jakarta Pusat', size: '500 - 1.000 Karyawan', initials: 'BG', jobs: 3 },
-  { id: 5, name: 'FastTrack Logistics', industry: 'Logistik', location: 'Semarang', size: '1.000+ Karyawan', initials: 'FL', jobs: 8 },
-  { id: 6, name: 'EduNation Hub', industry: 'Pendidikan', location: 'Yogyakarta', size: '10 - 50 Karyawan', initials: 'EH', jobs: 1 },
-  { id: 7, name: 'Creative Pulse Asia', industry: 'Media', location: 'Bandung', size: '50 - 100 Karyawan', initials: 'CP', jobs: 4 },
-  { id: 8, name: 'PwC Indonesia', industry: 'Konsultan', location: 'Jakarta Selatan', size: '1.000+ Karyawan', initials: 'PW', jobs: 12 },
-  { id: 9, name: 'Bank Mandiri', industry: 'Keuangan', location: 'Jakarta Selatan', size: '1.000+ Karyawan', initials: 'BM', jobs: 15 },
-];
+import React, { useState, useEffect } from 'react';
+import { Search, MapPin, ChevronDown, ChevronLeft, Globe, Users, Calendar, Mail, Loader2 } from 'lucide-react';
+import { fetchCompanies } from '../../services/companyServices'; 
 
 export default function Companies() {
+  const [companies, setCompanies] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [selectedCompany, setSelectedCompany] = useState(null);
 
-  // State Fitur Search & Filter
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndustry, setSelectedIndustry] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedSize, setSelectedSize] = useState(''); // State filter ukuran
+  
+  const [showAllCompanies, setShowAllCompanies] = useState(false);
 
-  // Extract Dropdown
-  const industries = [...new Set(mockCompanies.map(c => c.industry))];
-  const locations = [...new Set(mockCompanies.map(c => c.location))];
-  const sizes = [...new Set(mockCompanies.map(c => c.size))];
+  useEffect(() => {
+    const getCompaniesData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetchCompanies();
+        const companyList = response.data?.data?.companies || response.data?.data || response.data;
 
-  // Logika Pencarian & Filter
-  const filteredCompanies = mockCompanies.filter(company => {
+        if (Array.isArray(companyList)) {
+          const formattedData = companyList.map((comp) => {
+            
+            // Logika Pembacaan Ukuran Karyawan dari backend (employeeCount)
+            let sizeLabel = 'Informasi belum tersedia';
+            const empCount = comp.employeeCount || comp.size; 
+            
+            if (empCount) {
+               // Memastikan format akhirnya selalu ada kata "Karyawan"
+               sizeLabel = String(empCount).toLowerCase().includes('karyawan') 
+                 ? empCount 
+                 : `${empCount} Karyawan`;
+            }
+
+            return {
+              id: comp.companyId || comp.id,
+              name: comp.companyName || 'Perusahaan Tidak Bernama',
+              industry: comp.industry || 'Lainnya',
+              location: comp.location || 'Tidak diketahui',
+              initials: comp.companyName ? comp.companyName.substring(0, 2).toUpperCase() : 'NA',
+              size: sizeLabel, // <-- Field ukuran untuk filter & UI
+              jobs: comp.jobsCount || 0,
+              founded: comp.foundedAt ? new Date(comp.foundedAt).getFullYear() : '-', // Format tanggal berdirinya
+              website: comp.website || '-',
+              email: comp.contactEmail || '-',
+              address: comp.location || '-',
+              about: comp.description || 'Belum ada deskripsi untuk perusahaan ini.',
+              businessSector: comp.industry || '-',
+              availableJobs: []
+            };
+          });
+          
+          setCompanies(formattedData);
+        } else {
+          setError("Format data yang diterima dari server tidak sesuai.");
+        }
+      } catch (err) {
+        setError("Gagal memuat data perusahaan. Silakan coba lagi nanti.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getCompaniesData();
+  }, []);
+
+  // Ekstrak Opsi Filter (Hapus duplikat dan hindari nilai kosong/tidak tersedia)
+  const industries = [...new Set(companies.map(c => c.industry))].filter(Boolean);
+  const locations = [...new Set(companies.map(c => c.location))].filter(Boolean);
+  const sizes = [...new Set(companies.map(c => c.size))].filter(sz => sz !== 'Informasi belum tersedia');
+
+  // Proses Filter (Search, Industry, Location, Size)
+  const filteredCompanies = companies.filter(company => {
     const matchSearch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchIndustry = selectedIndustry === '' ? true : company.industry === selectedIndustry;
     const matchLocation = selectedLocation === '' ? true : company.location === selectedLocation;
@@ -54,15 +84,40 @@ export default function Companies() {
     return matchSearch && matchIndustry && matchLocation && matchSize;
   });
 
+  const displayedCompanies = showAllCompanies ? filteredCompanies : filteredCompanies.slice(0, 6);
+
+  if (isLoading) {
+    return (
+      <div className="w-full flex flex-col min-h-screen items-center justify-center bg-[#FBFAFF]">
+        <Loader2 className="animate-spin text-[#1E42AC]" size={40} />
+        <p className="mt-4 text-[#1E42AC] font-semibold">Memuat daftar perusahaan...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full flex flex-col min-h-screen items-center justify-center bg-[#FBFAFF]">
+        <div className="bg-red-100 p-4 rounded-xl text-red-600 font-semibold mb-4">{error}</div>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="px-5 py-2 bg-[#1E42AC] text-white font-bold rounded-lg shadow-md hover:bg-[#112664] transition-all text-sm"
+        >
+          Coba Lagi
+        </button>
+      </div>
+    );
+  }
+
   // ==========================================
-  // VIEW 1: COMPANY LISTING (PERSIS DASHBOARD)
+  // VIEW 1: DAFTAR PERUSAHAAN (COMPANY LISTING)
   // ==========================================
   if (!selectedCompany) {
     return (
       <div className="w-full flex flex-col min-h-screen pb-10 animate-fade-in bg-[#FBFAFF] font-['Poppins']">
         <div className="w-full max-w-[1000px] mx-auto px-8 pt-8">
           
-          {/* SEARCH BAR (Persis Dashboard) */}
+          {/* SEARCH BAR */}
           <div className="relative w-full max-w-[550px] mx-auto mb-6">
             <div className="absolute left-4 top-1/2 -translate-y-1/2">
               <Search size={18} className="text-gray-400" />
@@ -76,14 +131,14 @@ export default function Companies() {
             />
           </div>
 
-          {/* FILTER SECTION (Persis Dashboard) */}
+          {/* FILTER SECTION */}
           <div className="text-center mb-10">
-            <p className="font-bold text-[15px] mb-3 text-[#0B173D]">Filter Lowongan Pekerjaan Berdasarkan:</p>
-            <div className="flex justify-center gap-4">
+            <p className="font-bold text-[15px] mb-3 text-[#0B173D]">Filter Berdasarkan:</p>
+            <div className="flex justify-center gap-4 flex-wrap">
               
-              <div className="relative w-[160px]">
+              <div className="relative w-[180px]">
                 <select 
-                  className="w-full h-[36px] appearance-none bg-white border border-[#1E42AC] text-[#1E42AC] font-semibold text-[13px] rounded-full shadow-sm px-4 focus:outline-none cursor-pointer"
+                  className="w-full h-[36px] appearance-none bg-white border border-[#1E42AC] text-[#1E42AC] font-semibold text-[13px] rounded-full shadow-sm px-4 focus:outline-none cursor-pointer truncate pr-8"
                   value={selectedIndustry}
                   onChange={(e) => setSelectedIndustry(e.target.value)}
                 >
@@ -95,9 +150,9 @@ export default function Companies() {
                 </div>
               </div>
 
-              <div className="relative w-[160px]">
+              <div className="relative w-[180px]">
                 <select 
-                  className="w-full h-[36px] appearance-none bg-white border border-[#1E42AC] text-[#1E42AC] font-semibold text-[13px] rounded-full shadow-sm px-4 focus:outline-none cursor-pointer"
+                  className="w-full h-[36px] appearance-none bg-white border border-[#1E42AC] text-[#1E42AC] font-semibold text-[13px] rounded-full shadow-sm px-4 focus:outline-none cursor-pointer truncate pr-8"
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
                 >
@@ -109,14 +164,15 @@ export default function Companies() {
                 </div>
               </div>
 
-              <div className="relative w-[160px]">
+              {/* FILTER UKURAN KARYAWAN */}
+              <div className="relative w-[180px]">
                 <select 
-                  className="w-full h-[36px] appearance-none bg-white border border-[#1E42AC] text-[#1E42AC] font-semibold text-[13px] rounded-full shadow-sm px-4 focus:outline-none cursor-pointer"
+                  className="w-full h-[36px] appearance-none bg-white border border-[#1E42AC] text-[#1E42AC] font-semibold text-[13px] rounded-full shadow-sm px-4 focus:outline-none cursor-pointer truncate pr-8"
                   value={selectedSize}
                   onChange={(e) => setSelectedSize(e.target.value)}
                 >
                   <option value="">Semua Ukuran</option>
-                  {sizes.map(size => <option key={size} value={size}>{size}</option>)}
+                  {sizes.map(sz => <option key={sz} value={sz}>{sz}</option>)}
                 </select>
                 <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#1E42AC]">
                   <ChevronDown size={16} />
@@ -126,10 +182,10 @@ export default function Companies() {
             </div>
           </div>
 
-          {/* Section Title */}
+          {/* JUDUL SEKSI & TOMBOL LIHAT SEMUA */}
           <div className="flex justify-between items-end mb-4">
             <h2 className="font-bold text-[18px] text-[#0B173D]">
-              {filteredCompanies.length > 0 ? 'Perusahaan Terpopuler' : 'Perusahaan Tidak Ditemukan'}
+              {filteredCompanies.length > 0 ? 'Perusahaan Terdaftar' : 'Perusahaan Tidak Ditemukan'}
             </h2>
             {(searchTerm || selectedIndustry || selectedLocation || selectedSize) ? (
               <button 
@@ -139,42 +195,53 @@ export default function Companies() {
                 Reset Filter
               </button>
             ) : (
-              <button className="text-[#1E42AC] text-[13px] font-semibold underline">Lihat Semua</button>
+              filteredCompanies.length > 6 && (
+                <button 
+                  onClick={() => setShowAllCompanies(!showAllCompanies)}
+                  className="text-[#1E42AC] text-[13px] font-semibold underline"
+                >
+                  {showAllCompanies ? 'Sembunyikan' : 'Lihat Semua'}
+                </button>
+              )
             )}
           </div>
 
-          {/* Grid Companies (Ukuran grid & card persis Dashboard) */}
+          {/* GRID DATA PERUSAHAAN */}
           {filteredCompanies.length > 0 ? (
             <div className="grid grid-cols-3 gap-4">
-              {filteredCompanies.map((company) => (
-                <div key={company.id} className="bg-white border-2 border-[#CDD6EE] rounded-[20px] p-5 shadow-sm flex flex-col justify-between">
-                  
+              {displayedCompanies.map((company) => (
+                <div key={company.id} className="bg-white border-2 border-[#CDD6EE] rounded-[20px] p-5 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
                   <div>
                     <div className="flex justify-between items-start mb-4">
                       <div className="w-12 h-12 bg-[#112664] rounded-xl flex items-center justify-center text-white font-bold text-xl shrink-0">
                         {company.initials}
                       </div>
-                      <div className="px-3 py-1 bg-[#CFD6F0] rounded-full flex items-center justify-center">
-                        <span className="text-[10px] font-semibold text-[#0B173D]">{company.industry}</span>
+                      <div className="px-3 py-1 bg-[#CFD6F0] rounded-full flex items-center justify-center max-w-[120px]">
+                        <span className="text-[10px] font-semibold text-[#0B173D] truncate">{company.industry}</span>
                       </div>
                     </div>
 
                     <h3 className="font-bold text-[14px] text-[#0B173D] leading-tight mb-1">{company.name}</h3>
-                    <div className="flex items-center gap-1 text-gray-400 text-[11px] font-medium">
-                      <MapPin size={12} /> {company.location}
+                    
+                    <div className="flex flex-col gap-1 mt-2">
+                      <div className="flex items-center gap-1.5 text-gray-400 text-[11px] font-medium">
+                        <MapPin size={12} className="shrink-0 text-[#1E42AC]"/> <span className="truncate">{company.location}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-gray-400 text-[11px] font-semibold">
+                        <Users size={12} className="shrink-0 text-[#1E42AC]"/> <span className="truncate">{company.size}</span>
+                      </div>
                     </div>
                   </div>
 
                   <div className="mt-5 flex justify-between items-center">
-                    <span className="text-gray-400 text-[11px] font-bold">{company.jobs || 0} Lowongan</span>
+                    <span className="text-gray-400 text-[11px] font-bold">{company.jobs} Lowongan</span>
                     <button 
                       onClick={() => setSelectedCompany(company)}
-                      className="border border-[#1E42AC] text-[#1E42AC] px-5 py-1 rounded-lg shadow-md text-[12px] font-bold hover:bg-[#1E42AC] hover:text-white transition-all"
+                      className="border border-[#1E42AC] text-[#1E42AC] px-5 py-1 rounded-lg shadow-sm text-[12px] font-bold hover:bg-[#1E42AC] hover:text-white transition-all"
                     >
                       Lihat detail
                     </button>
                   </div>
-
                 </div>
               ))}
             </div>
@@ -189,7 +256,7 @@ export default function Companies() {
   }
 
   // ==========================================
-  // VIEW 2: COMPANY INFORMATION DETAIL
+  // VIEW 2: HALAMAN DETAIL INFORMASI PERUSAHAAN
   // ==========================================
   return (
     <div className="w-full flex flex-col min-h-screen pb-10 animate-fade-in bg-[#FBFAFF] font-['Poppins']">
@@ -236,13 +303,12 @@ export default function Companies() {
         {/* Main Content Grid */}
         <div className="grid grid-cols-3 gap-4">
           
-          {/* Kolom Kiri: Tentang & Lowongan (2 Kolom) */}
           <div className="col-span-2 space-y-4">
             <div>
               <h3 className="font-bold text-[15px] text-[#1E42AC] mb-2">Tentang Perusahaan</h3>
               <div className="bg-white border-2 border-[#CDD6EE] rounded-[20px] p-5 shadow-sm">
-                <p className="text-[12px] text-gray-600 leading-relaxed text-justify">
-                  {selectedCompany.about || "Belum ada deskripsi untuk perusahaan ini."}
+                <p className="text-[12px] text-gray-600 leading-relaxed text-justify whitespace-pre-line">
+                  {selectedCompany.about}
                 </p>
               </div>
             </div>
@@ -250,17 +316,19 @@ export default function Companies() {
             <div>
               <h3 className="font-bold text-[15px] text-[#1E42AC] mb-2">Lowongan Terbaru</h3>
               <div className="space-y-3">
-                {selectedCompany.availableJobs ? selectedCompany.availableJobs.map((job) => (
-                  <div key={job.id} className="bg-white border-2 border-[#CDD6EE] rounded-[20px] p-4 shadow-sm flex justify-between items-center">
-                    <div>
-                      <h4 className="font-bold text-[14px] text-[#0B173D]">{job.title}</h4>
-                      <p className="text-gray-400 text-[11px] font-medium mt-0.5">{job.type} • {job.location}</p>
+                {selectedCompany.availableJobs && selectedCompany.availableJobs.length > 0 ? (
+                  selectedCompany.availableJobs.map((job) => (
+                    <div key={job.id} className="bg-white border-2 border-[#CDD6EE] rounded-[20px] p-4 shadow-sm flex justify-between items-center">
+                      <div>
+                        <h4 className="font-bold text-[14px] text-[#0B173D]">{job.title}</h4>
+                        <p className="text-gray-400 text-[11px] font-medium mt-0.5">{job.type} • {job.location}</p>
+                      </div>
+                      <button className="border border-[#1E42AC] text-[#1E42AC] px-5 py-1.5 rounded-lg shadow-md text-[12px] font-bold hover:bg-[#1E42AC] hover:text-white transition-all">
+                        Lamar
+                      </button>
                     </div>
-                    <button className="border border-[#1E42AC] text-[#1E42AC] px-5 py-1.5 rounded-lg shadow-md text-[12px] font-bold hover:bg-[#1E42AC] hover:text-white transition-all">
-                      Lamar
-                    </button>
-                  </div>
-                )) : (
+                  ))
+                ) : (
                   <div className="text-center py-6 bg-white border-2 border-[#CDD6EE] rounded-[20px]">
                     <p className="text-gray-400 text-[12px]">Belum ada lowongan tersedia saat ini.</p>
                   </div>
@@ -269,26 +337,25 @@ export default function Companies() {
             </div>
           </div>
 
-          {/* Kolom Kanan: Sidebar Informasi (1 Kolom) */}
           <div className="space-y-4">
             <div>
               <h3 className="font-bold text-[15px] text-[#1E42AC] mb-2">Hubungi Kami</h3>
               <div className="bg-[#EAECF9] rounded-[20px] p-5 space-y-3 shadow-sm">
                 <div className="flex items-center gap-3 text-[#0B173D]">
-                  <Globe size={16} />
-                  <span className="text-[12px]">{selectedCompany.website || '-'}</span>
+                  <Globe size={16} className="text-[#1E42AC]" />
+                  <span className="text-[12px]">{selectedCompany.website}</span>
                 </div>
                 <div className="flex items-center gap-3 text-[#0B173D]">
-                  <Users size={16} />
-                  <span className="text-[12px]">{selectedCompany.size || '-'}</span>
+                  <Users size={16} className="text-[#1E42AC]" />
+                  <span className="text-[12px]">{selectedCompany.size}</span>
                 </div>
                 <div className="flex items-center gap-3 text-[#0B173D]">
-                  <Calendar size={16} />
-                  <span className="text-[12px]">{selectedCompany.founded || '-'}</span>
+                  <Calendar size={16} className="text-[#1E42AC]" />
+                  <span className="text-[12px]">Sejak {selectedCompany.founded}</span>
                 </div>
                 <div className="flex items-center gap-3 text-[#0B173D]">
-                   <Mail size={16} />
-                  <span className="text-[12px] truncate">{selectedCompany.email || '-'}</span>
+                   <Mail size={16} className="text-[#1E42AC]" />
+                  <span className="text-[12px] truncate">{selectedCompany.email}</span>
                 </div>
               </div>
             </div>
@@ -297,7 +364,7 @@ export default function Companies() {
               <h3 className="font-bold text-[15px] text-[#1E42AC] mb-2">Sektor Usaha</h3>
               <div className="bg-[#EAECF9] rounded-[20px] p-5 shadow-sm min-h-[60px] flex items-center">
                 <p className="text-[12px] text-[#0B173D] leading-relaxed">
-                  {selectedCompany.businessSector || "Informasi sektor usaha belum tersedia."}
+                  {selectedCompany.businessSector}
                 </p>
               </div>
             </div>
@@ -311,13 +378,13 @@ export default function Companies() {
                 <div className="p-4 flex gap-2 items-start">
                   <MapPin size={16} className="text-red-500 shrink-0" />
                   <p className="text-[12px] text-[#0B173D] leading-snug">
-                    {selectedCompany.address || '-'}
+                    {selectedCompany.address}
                   </p>
                 </div>
               </div>
             </div>
-
           </div>
+
         </div>
       </div>
     </div>
