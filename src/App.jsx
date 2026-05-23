@@ -64,25 +64,24 @@ function App() {
           </Route>
         </Route>
 
-          {/* RUTE DASHBOARD JOB SEEKER */}
+        {/* ================= RUTE DASHBOARD JOB SEEKER ================= */}
         <Route element={<ProtectedRoute allowedRoles={['job_seeker', 'jobseeker']} />}>
           <Route path="/jobseeker" element={<JobseekerLayout />}>
-          <Route path="joblisting" element={<DashboardJobseeker />} />
-          <Route path="companies" element={<Companies />} />
-          <Route path="messages" element={<MessagesJob />} />
-          <Route path="/jobseeker/status" element={<ApplicantStatus />} />
-          <Route path="notifications" element={<Notif />} />
-          <Route path="profile" element={<ProfileLogic />} />
-          <Route path="editprofile" element={<EditProfileLogic />} />
-          <Route path="/jobseeker/joblisting/:id" element={<DetailJobListing />} />
-          <Route path="joblisting/:id/lamar" element={<LamarJob />} />
+            <Route path="joblisting" element={<DashboardJobseeker />} />
+            <Route path="companies" element={<Companies />} />
+            <Route path="messages" element={<MessagesJob />} />
+            {/* PERBAIKAN: path disesuaikan menjadi applicant-status agar match dengan navigate di LamarJob */}
+            <Route path="applicant-status" element={<ApplicantStatus />} />
+            <Route path="notifications" element={<Notif />} />
+            <Route path="profile" element={<ProfileLogic />} />
+            <Route path="editprofile" element={<EditProfileLogic />} />
+            {/* PERBAIKAN: Menghapus '/' di awal agar menjadi nested route yang benar */}
+            <Route path="joblisting/:id" element={<DetailJobListing />} />
+            <Route path="joblisting/:id/lamar" element={<LamarJob />} />
           </Route>
         </Route>
 
-
-        {/* jika user mengetik URL yang salah, 
-             bisa tambahkan rute 404 di sini. 
-        */}
+        {/* jika user mengetik URL yang salah, bisa tambahkan rute 404 di sini. */}
       </Routes>
     </BrowserRouter>
   )
