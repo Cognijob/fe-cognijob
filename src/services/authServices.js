@@ -2,7 +2,7 @@ import axios from 'axios';
 import { saveToken, saveUser } from '../utils/storage';
 
 const api = axios.create({
-  baseURL: 'https://be-cognijob.vercel.app' 
+  baseURL: 'http://localhost:3000' 
 });
 
 // Helper
@@ -32,7 +32,7 @@ export const registerRecruiter = async (userData) => {
 export const login = async (credentials) => {
   try {
     const response = await api.post('/auth/login', credentials);
-    // Simpan token ke auth_token 
+    // Simpan token
     if (response.data.token) {
         localStorage.setItem('auth_token', response.data.token);
     }
