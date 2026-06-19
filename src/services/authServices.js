@@ -2,7 +2,7 @@ import axios from 'axios';
 import { saveToken, saveUser } from '../utils/storage';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000' 
+  baseURL: 'https://be-cognijob.vercel.app/' 
 });
 
 // Helper
