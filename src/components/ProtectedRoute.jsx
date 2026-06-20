@@ -12,20 +12,19 @@ const ProtectedRoute = ({ allowedRoles }) => {
   console.log("ProtectedRoute Debug - Token:", token);
   console.log("ProtectedRoute Debug - User:", user);
 
-  // 🛡️ EKSEKUSI PERTAHANAN MULTIMODE (TOP-LEVEL)
+  // PERTAHANAN DEPAN
   if (token) {
-    // SKENARIO ANCAMAN A: Hacker cuma copas token (fingerprint sengaja dikosongkan/null)
-    // SKENARIO ANCAMAN B: Hacker copas paket lengkap (tapi sidik jarinya milik browser korban)
-    if (!savedFingerprint || savedFingerprint !== currentBrowser) {
-      
-      // 1. Kunci layar browser penyerang dengan alert native
-      alert("⚠️ Deteksi Ancaman Session Hijacking: Sesi kamu tidak valid atau dicurigai telah dibajak!");
-      
-      // 2. Bersihkan token curian detik itu juga dari browser penyerang
+    // KASUS A: Jika user asli baru login (fingerprint masih kosong/null)
+    // maka akan dibuatkan secara otomatis agar dia bisa masuk 
+    if (!savedFingerprint) {
+      localStorage.setItem('browser_fingerprint', currentBrowser);
+      console.log("🟢 [ProtectedRoute] Fingerprint otomatis dibuat untuk user sah.");
+    } 
+    // KASUS B: Hacker copas paket lengkap (fingerprint ada, tapi punya browser korban)
+    else if (savedFingerprint !== currentBrowser) {
+      alert("⚠️ Deteksi Ancaman: Sesi kamu tidak valid atau dicurigai telah dibajak dari browser lain!");
       removeToken();
       localStorage.clear();
-      
-      // 3. Paksa refresh penuh untuk menendang penyerang ke landing page
       window.location.href = '/';
       return null;
     }
@@ -42,7 +41,6 @@ const ProtectedRoute = ({ allowedRoles }) => {
     return <Navigate to="/" replace />;
   }
 
-  // Jika semua lolos, tampilkan halaman (Bawaan)
   return <Outlet />;
 }; 
 
