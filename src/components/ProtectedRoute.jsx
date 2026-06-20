@@ -12,19 +12,23 @@ const ProtectedRoute = ({ allowedRoles }) => {
   console.log("ProtectedRoute Debug - Token:", token);
   console.log("ProtectedRoute Debug - User:", user);
 
-  // PERTAHANAN DEPAN
+  // EKSEKUSI PERTAHANAN 
   if (token) {
-    // KASUS A: Jika user asli baru login (fingerprint masih kosong/null)
-    // maka akan dibuatkan secara otomatis agar dia bisa masuk 
+    // Kasus 1: User asli baru login (Fingerprint di storage masih kosong)
     if (!savedFingerprint) {
       localStorage.setItem('browser_fingerprint', currentBrowser);
       console.log("🟢 [ProtectedRoute] Fingerprint otomatis dibuat untuk user sah.");
     } 
-    // KASUS B: Hacker copas paket lengkap (fingerprint ada, tapi punya browser korban)
+    // Kasus 2: Session Hijacking (Fingerprint tidak cocok dengan browser saat ini!)
     else if (savedFingerprint !== currentBrowser) {
+      // Kunci browser penyerang dengan alert 
       alert("⚠️ Deteksi Ancaman: Sesi kamu tidak valid atau dicurigai telah dibajak dari browser lain!");
+      
+      // Bersihkan token curian detik itu juga
       removeToken();
       localStorage.clear();
+      
+      // Paksa refresh dan tendang ke landing page
       window.location.href = '/';
       return null;
     }
@@ -41,6 +45,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
     return <Navigate to="/" replace />;
   }
 
+  // Jika semua lolos, tampilkan halaman (Bawaan)
   return <Outlet />;
 }; 
 
