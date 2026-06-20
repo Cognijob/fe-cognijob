@@ -1,20 +1,23 @@
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
-const FINGERPRINT_KEY = 'browser_fingerprint'; // 🛡️ Tambah key sidik jari
+const FINGERPRINT_KEY = 'browser_fingerprint';
 
 export const saveToken = (token) => {
   localStorage.setItem(TOKEN_KEY, token);
-  // 🛡️ Otomatis simpan sidik jari browser saat token disimpan
-  localStorage.setItem(FINGERPRINT_KEY, btoa(navigator.userAgent));
+  const fingerprint = btoa(navigator.userAgent);
+  localStorage.setItem(FINGERPRINT_KEY, fingerprint);
+  
+  console.log("🟢 [Storage] Token & Fingerprint berhasil disimpan:", fingerprint);
 };
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
-export const getFingerprint = () => localStorage.getItem(FINGERPRINT_KEY); // 🛡️ Helper ambil fingerprint
+export const getFingerprint = () => localStorage.getItem(FINGERPRINT_KEY);
 
 export const removeToken = () => {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
-  localStorage.removeItem(FINGERPRINT_KEY); // 🛡️ Bersihkan fingerprint saat logout
+  localStorage.removeItem(FINGERPRINT_KEY);
+  console.log("🔴 [Storage] Semua token dan fingerprint telah dibersihkan.");
 };
 
 export const saveUser = (user) => localStorage.setItem(USER_KEY, JSON.stringify(user));
