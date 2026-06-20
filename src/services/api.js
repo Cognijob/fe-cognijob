@@ -8,22 +8,18 @@ const api = axiosInstance.create({
   },
 });
 
-// Interceptor: Otomatis tempel token di setiap request + Lapisan Pertahanan Tambahan
+// Interceptor: Otomatis tempel token + Buatkan fingerprint untuk user asli saat login sukses
 api.interceptors.request.use((config) => {
   const token = getToken(); 
   const savedFingerprint = getFingerprint(); 
   const currentBrowser = btoa(navigator.userAgent); 
 
-  // 🛡️ PERTAHANAN LAPIS KEDUA (API BLOCKER):
-  // Jika diakses lewat rute dalam dan terdeteksi hijacking, langsung gagalkan request API ke backend
-  if (token && savedFingerprint && savedFingerprint !== currentBrowser) {
-    console.error("❌ Request blocked by interceptor due to fingerprint mismatch.");
-    removeToken();
-    localStorage.clear();
-    return Promise.reject(new Error("Session hijacked. Request blocked."));
+  // Jika request ini adalah proses hit API normal dan tokennya ada tapi fingerprint belum sempat terbuat,
+  // maka ini adalah fase transisi user asli setelah klik tombol login dan segera buatkan fingerprintnya
+  if (token && !savedFingerprint) {
+    localStorage.setItem('browser_fingerprint', currentBrowser);
   }
 
-  // Jika aman dan cocok, tempelkan token ke header authorization seperti biasa
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
