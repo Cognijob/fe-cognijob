@@ -8,37 +8,22 @@ const api = axiosInstance.create({
   },
 });
 
-// Interceptor agar otomatis tempel token di setiap request + Proteksi  + Alert Penahan
+// Interceptor: Otomatis tempel token di setiap request + Lapisan Pertahanan Tambahan
 api.interceptors.request.use((config) => {
   const token = getToken(); 
-  let savedFingerprint = getFingerprint(); 
+  const savedFingerprint = getFingerprint(); 
   const currentBrowser = btoa(navigator.userAgent); 
 
-  // Amankan user asli saat baru login
-  if (token && !savedFingerprint) {
-    localStorage.setItem('browser_fingerprint', currentBrowser);
-    savedFingerprint = currentBrowser;
-    console.log("🟢 [Keamanan] Fingerprint otomatis dibuat untuk user sah.");
-  }
-
-  // DETEKSI SESSION HIJACKING DENGAN ALERT
+  // 🛡️ PERTAHANAN LAPIS KEDUA (API BLOCKER):
+  // Jika diakses lewat rute dalam dan terdeteksi hijacking, langsung gagalkan request API ke backend
   if (token && savedFingerprint && savedFingerprint !== currentBrowser) {
-    
-    // Muncul alert dicurigai session hijacking
-    alert("⚠️ Deteksi Ancaman Session Hijacking: Sesi kamu tidak valid atau dicurigai telah dibajak dari browser lain!");
-    
-    // Fungsi menghancurkan token curian di browser penyerang
-    removeToken(); 
-    localStorage.clear(); 
-    
-    // Ada jeda 100ms agar alert ditampilkan/dirender sebelum dilempar ke landing page
-    setTimeout(() => {
-      window.location.href = '/'; 
-    }, 100);
-    
+    console.error("❌ Request blocked by interceptor due to fingerprint mismatch.");
+    removeToken();
+    localStorage.clear();
     return Promise.reject(new Error("Session hijacked. Request blocked."));
   }
 
+  // Jika aman dan cocok, tempelkan token ke header authorization seperti biasa
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
