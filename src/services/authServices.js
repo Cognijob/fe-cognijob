@@ -9,7 +9,7 @@ const api = axios.create({
 const handleAuthResponse = (response) => {
   const data = response.data;
   if (data.token) {
-    saveToken(data.token);
+    saveToken(data.token); // 🛡️ Di sini sidik jari browser otomatis ikut tersimpan aman
   }
   const user = data.data?.user || data.user;
   if (user) {
@@ -17,7 +17,6 @@ const handleAuthResponse = (response) => {
   }
   return data;
 };
-
 
 export const registerJobSeeker = async (userData) => {
   const response = await api.post('/auth/register/job-seeker', userData);
@@ -34,7 +33,7 @@ export const login = async (credentials) => {
     const response = await api.post('/auth/login', credentials);
     // Simpan token
     if (response.data.token) {
-        localStorage.setItem('auth_token', response.data.token);
+        saveToken(response.data.token); // 🛡️ Gunakan helper bawaan agar sinkron
     }
     return handleAuthResponse(response); 
   } catch (error) {
