@@ -1,46 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { getToken, getUser, getFingerprint, removeToken } from '../utils/storage';
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const token = getToken();
   const user = getUser();
-  let savedFingerprint = getFingerprint();
+  const savedFingerprint = getFingerprint();
   const currentBrowser = btoa(navigator.userAgent);
-  const [isHijacked, setIsHijacked] = useState(false);
-  
-  // Debugging log bawaan untuk memastikan data terbaca
+
+  // Debugging log bawaan
   console.log("ProtectedRoute Debug - Token:", token);
   console.log("ProtectedRoute Debug - User:", user);
 
-  // Eksekusi deteksi hijacking begitu komponen di-load browser
-  useEffect(() => {
-    // 1. Kondisi User Sah baru login (Token ada, tapi fingerprint di storage masih null)
-    if (token && !savedFingerprint) {
+  // 🛡️ EKSEKUSI PERTAHANAN 
+  if (token) {
+    // Kasus 1: User asli baru login (Fingerprint di storage masih kosong)
+    if (!savedFingerprint) {
       localStorage.setItem('browser_fingerprint', currentBrowser);
       console.log("🟢 [ProtectedRoute] Fingerprint otomatis dibuat untuk user sah.");
-      return;
-    }
-
-    // 2. Kondisi Session Hijacking (Token ada, fingerprint ada/tidak, tapi tidak cocok dengan browser saat ini)
-    if (token && savedFingerprint && savedFingerprint !== currentBrowser) {
-      setIsHijacked(true);
+    } 
+    // Kasus 2: Session Hijacking (Fingerprint tidak cocok dengan browser saat ini!)
+    else if (savedFingerprint !== currentBrowser) {
+      // 1. Kunci browser penyerang dengan alert (Ini akan menghentikan semua proses lain)
+      alert("⚠️ Deteksi Ancaman: Sesi kamu tidak valid atau dicurigai telah dibajak dari browser lain!");
       
-      // Mengunci browser penyerang dengan pop-up alert native
-      alert("⚠️ Deteksi Ancaman Session Hijacking: Sesi kamu tidak valid atau dicurigai telah dibajak dari browser lain!");
-      
-      // Hancurkan token curian saat itu juga sebelum pindah halaman
+      // 2. Bersihkan token curian detik itu juga
       removeToken();
       localStorage.clear();
       
-      // Alihkan paksa halaman penyerang ke landing page
+      // 3. Paksa refresh dan tendang ke landing page
       window.location.href = '/';
+      return null;
     }
-  }, [token, savedFingerprint, currentBrowser]);
-
-  // Jika sistem mendeteksi pembajakan, stop render dan langsung potong rute
-  if (isHijacked) {
-    return <Navigate to="/" replace />;
   }
 
   // Jika tidak ada token, paksa ke login (Bawaan)
