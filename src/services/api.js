@@ -8,31 +8,39 @@ const api = axiosInstance.create({
   },
 });
 
-// Interceptor: Otomatis tempel token di setiap request + Proteksi Super Ketat
+// Interceptor: Otomatis tempel token di setiap request + Proteksi 
 api.interceptors.request.use((config) => {
   const token = getToken(); 
-  const savedFingerprint = getFingerprint(); 
+  let savedFingerprint = getFingerprint(); 
   const currentBrowser = btoa(navigator.userAgent); 
 
-  // DETEKSI
+  // 🛡️ AMANKAN USER ASLI SAAT LOGIN:
+  // Jika token ada di storage, tapi fingerprint-nya masih kosong,
+  // artinya ini adalah USER ASLI yang baru saja sukses melakukan login.
+  // Kita otomatis buatkan sidik jari asli browsernya di storage saat itu juga.
+  if (token && !savedFingerprint) {
+    localStorage.setItem('browser_fingerprint', currentBrowser);
+    savedFingerprint = currentBrowser; // Perbarui variabel untuk pengecekan di bawah
+    console.log("🟢 [Keamanan] Fingerprint otomatis dibuat untuk user sah.");
+  }
+
+  // CEK/DETEKSI
   console.log("=== 🛡️ INTERCEPTOR CEK HIJACKING ===");
   console.log("• Token di Storage:", token ? "ADA" : "KOSONG");
-  console.log("• Fingerprint di Storage:", savedFingerprint ? savedFingerprint : "KOSONG/NULL");
+  console.log("• Fingerprint di Storage:", savedFingerprint);
   console.log("• Fingerprint Browser Saat Ini:", currentBrowser);
   console.log("=====================================");
 
-  // DETEKSI SESSION HIJACKING 
-  // Sistem akan langsung MEMBLOKIR dan MENENDANG jika:
-  // 1. Token ada, tapi fingerprint di storage kosong (Sengaja dihapus/dikurangi hacker)
-  // 2. Token ada, fingerprint ada, tapi tidak cocok dengan browser saat ini (Hasil copas browser lain)
-  if ((token && !savedFingerprint) || (token && savedFingerprint && savedFingerprint !== currentBrowser)) {
-    alert("⚠️ Deteksi Ancaman: Sesi kamu tidak valid atau dicurigai telah dibajak!");
+  // ETEKSI SESSION HIJACKING (PINTAR & AKURAT)
+  // Alert hanya akan meledak jika token ada, fingerprint ada, TAPI tidak cocok dengan browser saat ini!
+  if (token && savedFingerprint && savedFingerprint !== currentBrowser) {
+    alert("⚠️ Deteksi Ancaman: Sesi kamu tidak valid atau dicurigai telah dibajak dari browser lain!");
     
     removeToken(); 
     localStorage.clear(); 
     
     window.location.href = '/'; 
-    return Promise.reject(new Error("Session hijacked or invalid. Request blocked."));
+    return Promise.reject(new Error("Session hijacked. Request blocked."));
   }
 
   if (token) {
