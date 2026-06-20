@@ -8,38 +8,34 @@ const api = axiosInstance.create({
   },
 });
 
-// Interceptor: Otomatis tempel token di setiap request + Proteksi 
+// Interceptor agar otomatis tempel token di setiap request + Proteksi  + Alert Penahan
 api.interceptors.request.use((config) => {
   const token = getToken(); 
   let savedFingerprint = getFingerprint(); 
   const currentBrowser = btoa(navigator.userAgent); 
 
-  // 🛡️ AMANKAN USER ASLI SAAT LOGIN:
-  // Jika token ada di storage, tapi fingerprint-nya masih kosong,
-  // artinya ini adalah USER ASLI yang baru saja sukses melakukan login.
-  // Kita otomatis buatkan sidik jari asli browsernya di storage saat itu juga.
+  // Amankan user asli saat baru login
   if (token && !savedFingerprint) {
     localStorage.setItem('browser_fingerprint', currentBrowser);
-    savedFingerprint = currentBrowser; // Perbarui variabel untuk pengecekan di bawah
+    savedFingerprint = currentBrowser;
     console.log("🟢 [Keamanan] Fingerprint otomatis dibuat untuk user sah.");
   }
 
-  // CEK/DETEKSI
-  console.log("=== 🛡️ INTERCEPTOR CEK HIJACKING ===");
-  console.log("• Token di Storage:", token ? "ADA" : "KOSONG");
-  console.log("• Fingerprint di Storage:", savedFingerprint);
-  console.log("• Fingerprint Browser Saat Ini:", currentBrowser);
-  console.log("=====================================");
-
-  // ETEKSI SESSION HIJACKING (PINTAR & AKURAT)
-  // Alert hanya akan meledak jika token ada, fingerprint ada, TAPI tidak cocok dengan browser saat ini!
+  // DETEKSI SESSION HIJACKING DENGAN ALERT
   if (token && savedFingerprint && savedFingerprint !== currentBrowser) {
-    alert("⚠️ Deteksi Ancaman: Sesi kamu tidak valid atau dicurigai telah dibajak dari browser lain!");
     
+    // Muncul alert dicurigai session hijacking
+    alert("⚠️ Deteksi Ancaman Session Hijacking: Sesi kamu tidak valid atau dicurigai telah dibajak dari browser lain!");
+    
+    // Fungsi menghancurkan token curian di browser penyerang
     removeToken(); 
     localStorage.clear(); 
     
-    window.location.href = '/'; 
+    // Ada jeda 100ms agar alert ditampilkan/dirender sebelum dilempar ke landing page
+    setTimeout(() => {
+      window.location.href = '/'; 
+    }, 100);
+    
     return Promise.reject(new Error("Session hijacked. Request blocked."));
   }
 
