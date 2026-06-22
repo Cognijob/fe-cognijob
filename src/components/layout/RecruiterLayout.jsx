@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Search, Bell, X } from 'lucide-react'
+import { removeToken } from '../utils/storage' // Pastikan path utils/storage ini sesuai dengan struktur foldermu
 
 import DashboardIcon from '../../assets/DashboardPages/DashboardIcon.png'
 import JobIcon from '../../assets/DashboardPages/JobIcon.png'
@@ -26,6 +27,18 @@ export default function RecruiterLayout() {
     { path: '/recruiter/company-profile', label: 'Company Profile', icon: CompanyIcon },
     { path: '/recruiter/settings', label: 'Settings', icon: SettingIcon },
   ]
+
+  // Fungsi Handler Logout dengan Konfirmasi dan Pembersihan Sesi Total
+  const handleLogoutClick = (e) => {
+    e.preventDefault(); // Mencegah navigasi link default
+    
+    const confirmLogout = window.confirm("Apakah kamu yakin ingin keluar dari akun ini?");
+    if (confirmLogout) {
+      removeToken(); // Menghapus token utama
+      localStorage.clear(); // Membersihkan seluruh data sesi (termasuk fingerprint)
+      navigate('/'); // Kembali ke landing page utama
+    }
+  }
 
   const getBreadcrumbs = () => {
     const breadcrumbMap = {
@@ -115,6 +128,21 @@ export default function RecruiterLayout() {
           <div className="flex flex-col gap-1">
             <h3 className="px-4 text-[11px] font-extrabold text-[#8A95A5] uppercase tracking-widest mb-2">Account</h3>
             {accountMenuItems.map(renderMenuItem)}
+            
+            {/* Tombol Logout Khusus yang Disisipkan Sesuai Format Eksis Menu Lain */}
+            <Link 
+              to="#" 
+              onClick={handleLogoutClick} 
+              className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-[14px] font-medium text-white/70 hover:bg-red-500/20 hover:text-red-400"
+            >
+              <img 
+                src={SettingIcon} 
+                alt="Logout" 
+                className="w-5 h-5 object-contain brightness-0 invert transition-opacity opacity-70" 
+                style={{ filter: 'hue-rotate(320deg) saturate(500%)' }} // Memberikan sedikit sentuhan warna merah lembut agar estetik namun tetap seragam
+              />
+              Logout
+            </Link>
           </div>
         </nav>
       </aside>

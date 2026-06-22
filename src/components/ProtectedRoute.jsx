@@ -14,21 +14,20 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
   // EKSEKUSI PERTAHANAN 
   if (token) {
-    // Kasus 1: User asli baru login (Fingerprint di storage masih kosong)
+    // Kasus 1: User asli baru login 
     if (!savedFingerprint) {
       localStorage.setItem('browser_fingerprint', currentBrowser);
       console.log("🟢 [ProtectedRoute] Fingerprint otomatis dibuat untuk user sah.");
     } 
     // Kasus 2: Session Hijacking (Fingerprint tidak cocok dengan browser saat ini!)
     else if (savedFingerprint !== currentBrowser) {
-      // Kunci browser penyerang dengan alert 
       alert("⚠️ Deteksi Ancaman: Sesi kamu tidak valid atau dicurigai telah dibajak dari browser lain!");
       
-      // Bersihkan token curian detik itu juga
+      // Bersihkan token curian 
       removeToken();
       localStorage.clear();
       
-      // Paksa refresh dan tendang ke landing page
+      // Paksa refresh dan kembali ke landing page
       window.location.href = '/';
       return null;
     }
