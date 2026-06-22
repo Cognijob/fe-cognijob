@@ -221,7 +221,6 @@ export default function RecruiterLayout() {
                 src={SettingIcon}
                 alt="Logout"
                 className="w-5 h-5 object-contain brightness-0 invert transition-opacity opacity-70"
-                style={{ filter: "hue-rotate(320deg) saturate(500%)" }} // Memberikan sedikit sentuhan warna merah lembut agar estetik namun tetap seragam
               />
               Logout
             </Link>
