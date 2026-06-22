@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { getToken, getUser, getFingerprint, removeToken } from '../utils/storage';
+import { getToken, getUser, getFingerprint, removeToken } from '../../utils/storage';
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const token = getToken();
