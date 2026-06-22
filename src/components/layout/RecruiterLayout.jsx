@@ -217,11 +217,6 @@ export default function RecruiterLayout() {
               onClick={handleLogoutClick}
               className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-[14px] font-medium text-white/70 hover:bg-red-500/20 hover:text-red-400"
             >
-              <img
-                src={SettingIcon}
-                alt="Logout"
-                className="w-5 h-5 object-contain brightness-0 invert transition-opacity opacity-70"
-              />
               Logout
             </Link>
           </div>
