@@ -5,7 +5,7 @@ import {
   getUser,
   getFingerprint,
   removeToken,
-} from "../../utils/storage";
+} from "../utils/storage";
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const token = getToken();
